@@ -10,64 +10,68 @@
 <meta property="og:type" content="website" />
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap');
-:root{--accent:#E8FE5B}
+:root{--accent:#F0A830;--bg:#0E1726;--panel:#131d33;--border:#24304a}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{background:#0B0B0C;color:#F4F4F0;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+body{background:var(--bg);color:#EDE8DF;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
 img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 
 /* layout: game rail (left) + chat (right) */
-#app{display:flex;height:100vh;height:100dvh}
+#app{display:flex;height:100vh;height:100dvh;max-width:1500px;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}
 
 /* ---- vertical game rail ---- */
-#rail-game{flex:0 0 300px;display:flex;flex-direction:column;border-right:1px solid #1d1d20;background:#bfe6f5;position:relative}
-.rg-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#0B0B0C;border-bottom:1px solid #1d1d20}
+#rail-game{flex:0 0 340px;display:flex;flex-direction:column;border-right:3px solid var(--accent);background:#bfe6f5;position:relative;box-shadow:4px 0 24px rgba(0,0,0,.4)}
+.rg-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--bg);border-bottom:1px solid var(--border)}
 .rg-head .t{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--accent)}
-.rg-head .y{font-family:'Press Start 2P',monospace;font-size:11px;color:#fff;background:#000;border:2px solid #333;border-radius:3px;padding:4px 7px}
+.rg-head .y{font-family:'Press Start 2P',monospace;font-size:11px;color:#fff;background:#0a1120;border:2px solid var(--border);border-radius:3px;padding:4px 7px}
 #gwrap{flex:1;position:relative;overflow:hidden}
 canvas#game{position:absolute;inset:0;width:100%;height:100%}
-#gprompt{position:absolute;bottom:64px;left:0;right:0;text-align:center;z-index:5;font-family:'Press Start 2P',monospace;font-size:8px;color:#0B0B0C;background:rgba(232,254,91,.85);margin:0 30px;padding:6px 4px;border-radius:4px;animation:bl 1.1s steps(2) infinite}
+#gprompt{position:absolute;bottom:64px;left:0;right:0;text-align:center;z-index:5;font-family:'Press Start 2P',monospace;font-size:8px;color:#0E1726;background:rgba(240,168,48,.92);margin:0 30px;padding:6px 4px;border-radius:4px;animation:bl 1.1s steps(2) infinite}
 @keyframes bl{50%{opacity:.45}}
 /* job card pops over the rail */
 #jobcard{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%) scale(.92);z-index:8;
-  background:#13110f;border:3px solid var(--accent);border-radius:6px;padding:14px 14px;box-shadow:0 0 0 3px #000,6px 6px 0 rgba(0,0,0,.5);
+  background:var(--panel);border:3px solid var(--accent);border-radius:6px;padding:14px 14px;box-shadow:0 0 0 3px #0a1120,6px 6px 0 rgba(0,0,0,.45);
   opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 #jobcard.show{opacity:1;transform:translateY(-50%) scale(1)}
 #jobcard .yr{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--accent)}
 #jobcard .org{font-family:'Press Start 2P',monospace;font-size:11px;margin:8px 0 6px;line-height:1.4;color:#fff}
 #jobcard .role{font-weight:700;font-size:.98rem}
 #jobcard .blurb{margin-top:7px;font-size:.86rem;line-height:1.45;color:#cfc6b6}
-#jobcard .x{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6a70;margin-top:10px}
+#jobcard .x{font-family:'JetBrains Mono',monospace;font-size:9px;color:#7c8498;margin-top:10px}
 /* vertical controls */
-#gcontrols{display:flex;justify-content:center;gap:14px;padding:12px;background:#0B0B0C;border-top:1px solid #1d1d20}
-.btn{font-family:'Press Start 2P',monospace;font-size:12px;color:#0B0B0C;background:var(--accent);border:3px solid #000;border-radius:6px;padding:12px 18px;cursor:pointer;box-shadow:3px 3px 0 #000;user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+#gcontrols{display:flex;justify-content:center;gap:14px;padding:12px;background:var(--bg);border-top:1px solid var(--border)}
+.btn{font-family:'Press Start 2P',monospace;font-size:12px;color:#0E1726;background:var(--accent);border:3px solid #0a1120;border-radius:6px;padding:12px 18px;cursor:pointer;box-shadow:3px 3px 0 #0a1120;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #0a1120}
 
 /* ---- chat (the star) ---- */
 #chat{flex:1;display:flex;flex-direction:column;min-width:0}
-.chat-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid #1d1d20}
-.chat-head .os{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;color:#F4F4F0}
+.chat-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border)}
+.chat-head .os{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;color:#EDE8DF}
 .chat-head .os .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);margin-right:7px}
-.chat-head .hr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a6a70;letter-spacing:1px;text-transform:uppercase}
-.intro-card{max-width:760px;margin:0 auto;width:100%;padding:36px 22px 6px}
-.intro-card h1{font-family:'Space Grotesk';font-weight:700;font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.05;color:#F4F4F0}
+.beta{margin-left:9px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 6px;vertical-align:middle;opacity:.9}
+.chat-head .hr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c8498;letter-spacing:1px;text-transform:uppercase}
+.intro-card{max-width:760px;margin:0;width:100%;padding:36px 30px 6px}
+.intro-card h1{font-family:'Space Grotesk';font-weight:700;font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.05;color:#EDE8DF}
 .intro-card h1 .a{color:var(--accent)}
-.intro-card p{margin-top:14px;color:#bcbcc0;font-size:1.08rem;line-height:1.5;max-width:560px}
-#thread{flex:1;overflow-y:auto;padding:14px 22px;display:flex;flex-direction:column;gap:16px;max-width:760px;width:100%;margin:0 auto}
+.intro-card p{margin-top:14px;color:#a9b0c2;font-size:1.08rem;line-height:1.5;max-width:560px}
+#thread{flex:1;overflow-y:auto;padding:14px 30px;display:flex;flex-direction:column;gap:16px;max-width:760px;width:100%;margin:0}
 .rowU{display:flex;justify-content:flex-end}.rowB{display:flex;flex-direction:column;gap:6px}
 .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent)}
-.bU{background:#1b1b1f;border:1px solid #2a2a2e;border-radius:14px 14px 2px 14px;padding:11px 15px;max-width:80%;font-size:1.02rem;line-height:1.45;color:#F4F4F0}
-.bB{border-left:2px solid var(--accent);padding-left:15px;max-width:92%;font-size:1.06rem;line-height:1.55;color:#ECECE8}
+.bU{background:var(--panel);border:1px solid var(--border);border-radius:14px 14px 2px 14px;padding:11px 15px;max-width:80%;font-size:1.02rem;line-height:1.45;color:#EDE8DF}
+.bB{border-left:2px solid var(--accent);padding-left:15px;max-width:92%;font-size:1.06rem;line-height:1.55;color:#E6E0D6}
 .bB p{margin:0 0 .6em}
-#chips{display:flex;gap:8px;overflow-x:auto;padding:8px 22px;max-width:760px;width:100%;margin:0 auto}
-.chip{white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#d8d8d4;background:transparent;border:1px solid #2e2e33;border-radius:40px;padding:8px 15px;cursor:pointer;transition:.15s}
+#chips{display:flex;gap:8px;overflow-x:auto;padding:8px 30px;max-width:760px;width:100%;margin:0}
+.chip{white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#cdd3df;background:transparent;border:1px solid var(--border);border-radius:40px;padding:8px 15px;cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
-.composer{display:flex;align-items:center;gap:10px;padding:14px 22px 20px;border-top:1px solid #1d1d20;max-width:760px;width:100%;margin:0 auto}
-.composer input{flex:1;background:transparent;border:none;outline:none;color:#F4F4F0;font-family:'JetBrains Mono',monospace;font-size:1rem}
-.send{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:#0B0B0C;background:var(--accent);border:none;border-radius:8px;padding:9px 16px;cursor:pointer;letter-spacing:1px}
+.composer{display:flex;align-items:center;gap:12px;margin:0 30px 26px;padding:6px 6px 6px 18px;
+  border:2px solid var(--border);border-radius:14px;background:var(--panel);max-width:760px;width:calc(100% - 60px);
+  box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,168,48,.22),0 6px 24px rgba(0,0,0,.5)}
+.composer input{flex:1;background:transparent;border:none;outline:none;color:#EDE8DF;font-family:'JetBrains Mono',monospace;font-size:1.05rem;padding:12px 0}
+.send{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:#0E1726;background:var(--accent);border:none;border-radius:10px;padding:13px 22px;cursor:pointer;letter-spacing:1px}
 .send:disabled{opacity:.4}
 .blink{animation:bl 1.2s steps(2) infinite}
-::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:4px}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
 /* MOBILE: no game, chat only */
 @media(max-width:780px){
@@ -103,7 +107,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
   <!-- chat -->
   <section id="chat">
     <div class="chat-head">
-      <div class="os"><span class="dot"></span>RAVI-OS v1.0</div>
+      <div class="os"><span class="dot"></span>RAVI-OS v1.0<span class="beta">BETA</span></div>
       <div class="hr">an interview with the work of ravi gokal</div>
     </div>
     <div class="intro-card">
@@ -126,15 +130,18 @@ const API_URL="/api/ask";
 
 // top(present) → bottom(past)
 const JOBS=[
-  {yr:"2025",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"commission",col:"#7a4a73"},
-  {yr:"2024",org:"MINISTRY OF\nJUSTICE",role:"Senior BA · Integration Lead",blurb:"Leading integration on Te Au Reka — a cloud-native case system for NZ courts. A support strategy endorsed by the judiciary.",building:"courthouse",col:"#c9b890"},
-  {yr:"2023",org:"FOREIGN\nAFFAIRS",role:"Senior BA · Cloud Transformation",blurb:"Secure-by-design Microsoft 365 for a high-threat ministry. Migrating sensitive content, hardening to NZISM, securing funding.",building:"embassy",col:"#2f7d72"},
-  {yr:"2022",org:"NEW ZEALAND\nPOLICE",role:"Senior Business Analyst",blurb:"The million-dollar saving. Reshaped M365 licensing and a 170+ TB email migration — recommending a solution saving over $1M a year.",building:"police",col:"#26407a"},
-  {yr:"2020",org:"NZ TRANSPORT\nAGENCY",role:"Lead Business Analyst",blurb:"Lead BA on a cloud-native roadside enforcement platform — IoT sensors, ANPR cameras, smart signs. Product Owner & mentor.",building:"transport",col:"#c46a1a"},
-  {yr:"2018",org:"MSD · TEC",role:"Business Analyst",blurb:"Kept myMSD alive through outages with an operational data lake; stepped in as Scrum Master. Then automation & M365 rollout at TEC.",building:"govhall",col:"#5a6a3a"},
-  {yr:"2014",org:"BECA · UNI ·\nDAVANTI",role:"Consultant / BA",blurb:"Finding range. ICT asset plans for government, the University's first Scrum squad, marketing-automation readiness for a distributor.",building:"university",col:"#8a6a4a"},
-  {yr:"2012",org:"HEALTH\nALLIANCE",role:"Business Analyst",blurb:"Early days. Oracle inventory management to hospital theatres and wards across two DHBs — 'business analyst extraordinaire'.",building:"hospital",col:"#d8d8e0"},
-  {yr:"2011",org:"NORTH\nPOWER",role:"Process Analyst",blurb:"The first rung. Mapping operational processes in the utilities sector — the very first analyst role, where the story begins.",building:"powerplant",col:"#9a7a3a"},
+  {yr:"2025",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"tribunal",col:"#3a5a7a"},
+  {yr:"2025",org:"FOREIGN AFFAIRS\n(SECURITY)",role:"Senior BA · Security Consultant",blurb:"Security uplift for a high-threat global ministry — modernising the mobile fleet from BlackBerry to Microsoft Intune, with tiered controls calibrated to each post's threat level.",building:"secure",col:"#3a6a5a"},
+  {yr:"2024–25",org:"MINISTRY OF\nJUSTICE",role:"Senior BA · Integration Lead",blurb:"Leading integration on Te Au Reka — a cloud-native case system for NZ courts. A support strategy endorsed by the judiciary.",building:"courthouse",col:"#c9b890"},
+  {yr:"2024",org:"NZ TRANSPORT\n(SAFETY CAMERAS)",role:"Senior BA · RFP Advisor",blurb:"Safety Camera Programme — defined the requirements to move speed-camera operations from Police to NZTA and out to an operator. Advised the procurement panel.",building:"camera",col:"#b85a8a"},
+  {yr:"2023–24",org:"FOREIGN\nAFFAIRS",role:"Senior BA · Cloud Transformation",blurb:"Secure-by-design Microsoft 365 for a high-threat ministry. Migrating sensitive content, hardening to NZISM, securing funding.",building:"embassy",col:"#2f7d72"},
+  {yr:"2022–23",org:"NEW ZEALAND\nPOLICE",role:"Senior Business Analyst",blurb:"The million-dollar saving. Reshaped M365 licensing and a 170+ TB email migration — recommending a solution saving over $1M a year.",building:"police",col:"#26407a"},
+  {yr:"2020–22",org:"NZ TRANSPORT\nAGENCY",role:"Lead Business Analyst",blurb:"Lead BA on a cloud-native roadside enforcement platform — IoT sensors, ANPR cameras, smart signs screening heavy vehicles. Product Owner & mentor.",building:"transport",col:"#c46a1a"},
+  {yr:"2019–20",org:"TERTIARY EDUC.\nCOMMISSION",role:"Senior Business Analyst",blurb:"Recruitment automation (Springboard) and a Microsoft 365 rollout — config, workflow testing, change management and training.",building:"govhall",col:"#5a6a3a"},
+  {yr:"2018–19",org:"MINISTRY OF\nSOCIAL DEV.",role:"Business Analyst",blurb:"Kept myMSD alive through outages with an operational data lake; stepped in as Scrum Master; led production defect triage. Also supported CYRAS.",building:"socialdev",col:"#4a7a8a"},
+  {yr:"2015–17",org:"UNIVERSITY OF\nAUCKLAND ·etc",role:"Business Analyst / Consultant",blurb:"Finding range. The University's first Scrum squad redeveloping its website and the scholarship system — plus contracts at Victoria University and Davanti.",building:"university",col:"#8a6a4a"},
+  {yr:"2012–14",org:"HEALTH\nALLIANCE",role:"Business Analyst",blurb:"Early days. Oracle inventory management to hospital theatres and wards across two DHBs — 'business analyst extraordinaire'.",building:"hospital",col:"#d8d8e0"},
+  {yr:"2011–12",org:"NORTH\nPOWER",role:"Process Analyst",blurb:"The first rung. Mapping operational processes in the utilities sector — the very first analyst role, where the story begins.",building:"powerplant",col:"#9a7a3a"},
 ];
 
 const cv=document.getElementById('game'),ctx=cv.getContext('2d');
@@ -183,7 +190,59 @@ function drawBuilding(j,cx,baseY){
   else if(t==='police'){const[bx,by,bw,bh]=B(120,116);windows(bx,by,bw,bh,c,26,26);px2(bx,by,bw,8,dk);for(const ox of[-26,26]){px2(sx+ox-4,baseY-38,9,11,'#3a6ee8');px2(sx+ox-2,baseY-40,5,4,'#9ac4ff');}for(let i=0;i<bw/12;i++)px2(bx+i*12,by+bh-20,12,7,(i%2)?'#fff':'#1a2a5a');ctx.fillStyle='#ffd24d';ctx.beginPath();ctx.moveTo(sx,by-36);ctx.lineTo(sx-10,by-29);ctx.lineTo(sx-10,by-16);ctx.lineTo(sx,by-10);ctx.lineTo(sx+10,by-16);ctx.lineTo(sx+10,by-29);ctx.closePath();ctx.fill();door(sx,baseY,'#16264a');}
   else if(t==='embassy'){const[bx,by,bw,bh]=B(116,84);windows(bx,by,bw,bh,c,26,24);px2(bx,by,bw,7,shade(c,30));const gx=sx,gy=by-34,gr=32;ctx.fillStyle='#3aa0d8';ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.fill();ctx.fillStyle='#2a90c8';ctx.beginPath();ctx.arc(gx,gy,gr,0.3,Math.PI-0.3);ctx.fill();ctx.fillStyle='#5fc26a';px2(gx-21,gy-14,13,9,'#5fc26a');px2(gx-11,gy-6,8,14,'#5fc26a');px2(gx+3,gy-17,14,8,'#5fc26a');px2(gx+8,gy-9,11,12,'#5fc26a');px2(gx-5,gy+9,9,6,'#5fc26a');ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.moveTo(gx-gr,gy);ctx.lineTo(gx+gr,gy);ctx.ellipse(gx,gy,gr*0.5,gr,0,0,7);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(gx-11,gy-11,5,0,7);ctx.fill();door(sx,baseY,c);}
   else if(t==='courthouse'){const[bx,by,bw,bh]=B(120,98);ctx.fillStyle=shade(c,-12);ctx.beginPath();ctx.moveTo(bx-5,by);ctx.lineTo(sx,by-32);ctx.lineTo(bx+bw+5,by);ctx.closePath();ctx.fill();for(let i=0;i<5;i++){const colx=bx+14+i*24;px2(colx,by+5,11,bh-24,shade(c,22));px2(colx,by+5,11,3,shade(c,-10));px2(colx,by+bh-22,11,3,shade(c,-10));}px2(bx-5,by+bh-19,bw+10,7,shade(c,-20));px2(sx-1,by-27,2,13,'#3a2d12');px2(sx-10,by-24,20,2,'#3a2d12');px2(sx-10,by-22,3,4,'#ffd24d');px2(sx+7,by-22,3,4,'#ffd24d');door(sx,baseY,shade(c,-30));}
-  else {const[bx,by,bw,bh]=B(92,150);for(let wx=bx+8;wx<bx+bw-13;wx+=20){px2(wx,by+10,13,bh-20,'#0d0d18');for(let wy=by+14;wy<by+bh-14;wy+=15)px2(wx+2,wy,9,6,shade(c,75));}px2(bx,by,bw,8,shade(c,40));px2(sx-1,by-24,2,24,dk);px2(sx-5,by-24,10,3,lt);door(sx,baseY,c);}
+  else if(t==='socialdev'){ // MSD — community hall with a heart/people emblem
+    const[bx,by,bw,bh]=B(120,108);windows(bx,by,bw,bh,c,26,26);px2(bx-3,by,bw+6,8,dk);
+    // gentle gabled roof
+    ctx.fillStyle=dk;ctx.beginPath();ctx.moveTo(bx-4,by);ctx.lineTo(sx,by-22);ctx.lineTo(bx+bw+4,by);ctx.closePath();ctx.fill();
+    // heart emblem
+    ctx.fillStyle='#e86a8a';ctx.beginPath();ctx.arc(sx-5,by-12,5,0,7);ctx.arc(sx+5,by-12,5,0,7);ctx.moveTo(sx-9,by-10);ctx.lineTo(sx,by+2);ctx.lineTo(sx+9,by-10);ctx.fill();
+    px2(sx-30,baseY-8,60,8,shade(c,-22));door(sx,baseY,c);
+  }
+  else if(t==='camera'){ // NZTA Safety Cameras — pole-mounted speed camera + flash
+    const[bx,by,bw,bh]=B(104,72);windows(bx,by,bw,bh,c,26,24);px2(bx,by,bw,7,shade(c,30));
+    // tall camera pole beside the building
+    const polx=sx+58;px2(polx,by-70,6,bh+70,'#555');
+    // camera head
+    px2(polx-26,by-78,30,18,'#222');px2(polx-26,by-78,30,4,'#444');
+    px2(polx-22,by-74,8,8,'#9ad');           // lens
+    px2(polx-12,by-72,4,4,'#f55');           // record dot
+    // flash burst
+    ctx.fillStyle='rgba(255,255,210,.85)';ctx.beginPath();ctx.moveTo(polx-30,by-70);ctx.lineTo(polx-46,by-78);ctx.lineTo(polx-44,by-66);ctx.lineTo(polx-58,by-66);ctx.lineTo(polx-44,by-58);ctx.lineTo(polx-48,by-46);ctx.lineTo(polx-30,by-58);ctx.closePath();ctx.fill();
+    // road dashes in front
+    px2(bx-12,baseY-9,bw+24,9,'#2a2a2e');for(let i=bx-8;i<bx+bw+16;i+=20)px2(i,baseY-6,10,3,'#ffd24d');
+    door(sx,baseY,c);
+  }
+  else if(t==='secure'){ // MFAT Security — fortified building, shield + padlock
+    const[bx,by,bw,bh]=B(112,104);windows(bx,by,bw,bh,c,26,26);px2(bx,by,bw,8,dk);
+    // antenna/dish on roof (secure comms)
+    px2(sx+34,by-22,3,22,'#888');ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(sx+35,by-24,7,Math.PI,2*Math.PI);ctx.fill();
+    // shield emblem with padlock
+    ctx.fillStyle='#cdd6e0';ctx.beginPath();ctx.moveTo(sx,by-40);ctx.lineTo(sx-14,by-33);ctx.lineTo(sx-14,by-16);ctx.lineTo(sx,by-7);ctx.lineTo(sx+14,by-16);ctx.lineTo(sx+14,by-33);ctx.closePath();ctx.fill();
+    ctx.fillStyle=shade(c,-20);ctx.beginPath();ctx.moveTo(sx,by-36);ctx.lineTo(sx-10,by-31);ctx.lineTo(sx-10,by-18);ctx.lineTo(sx,by-11);ctx.lineTo(sx+10,by-18);ctx.lineTo(sx+10,by-31);ctx.closePath();ctx.fill();
+    // padlock on shield
+    px2(sx-4,by-26,8,7,'#ffd24d');ctx.strokeStyle='#ffd24d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx,by-27,3,Math.PI,2*Math.PI);ctx.stroke();
+    door(sx,baseY,dk);
+  }
+  else { // tribunal — Fair Work Commission: modern glass office + a clear scales roof sign
+    const[bx,by,bw,bh]=B(104,150);
+    // glass curtain wall
+    for(let wx=bx+8;wx<bx+bw-13;wx+=20){px2(wx,by+12,13,bh-22,'#0d1822');for(let wy=by+16;wy<by+bh-14;wy+=15)px2(wx+2,wy,9,6,shade(c,70));}
+    px2(bx,by,bw,9,shade(c,40));px2(bx,by,5,bh,shade(c,18));px2(bx+bw-5,by,5,bh,shade(c,-28));
+    // a dark sign panel on the roof holding a clean ⚖ icon (readable, not a blob)
+    const pw=54,ph=30,pxx=sx-pw/2,pyy=by-ph-6;
+    px2(pxx,pyy,pw,ph,'#13110f');px2(pxx,pyy,pw,3,'#2a2620');
+    // scales icon, drawn with clear thick strokes on the dark panel
+    const ey=pyy+ph/2;
+    px2(sx-1,ey-9,2,18,'#F0A830');                 // vertical post
+    px2(sx-15,ey-9,30,2,'#F0A830');                // top beam
+    px2(sx-15,ey-9,2,5,'#F0A830');px2(sx+13,ey-9,2,5,'#F0A830'); // hangers
+    px2(sx-20,ey-4,11,2,'#F0A830');                // left pan
+    px2(sx+9,ey-4,11,2,'#F0A830');                 // right pan
+    px2(sx-6,ey+9,12,2,'#F0A830');                 // base foot
+    // entrance canopy
+    px2(sx-26,baseY-34,52,6,shade(c,-20));px2(sx-22,baseY-34,4,34,shade(c,-10));px2(sx+18,baseY-34,4,34,shade(c,-10));
+    door(sx,baseY,shade(c,-20));
+  }
 }
 
 // vertical character (walking down/up)
@@ -217,7 +276,7 @@ function loop(ts){
   // clouds (parallax)
   for(let i=0;i<6;i++){const cy=((i*220 - camY*0.2)%(H+200)+ (H+200))%(H+200)-100;const cx=(i*97)%W;px2(cx,cy,30,9,'rgba(255,255,255,.85)');px2(cx+10,cy-7,28,9,'rgba(255,255,255,.85)');}
   // grass verges + vertical road down the middle
-  const pathW=120, pathX=W/2-pathW/2;
+  const pathW=86, pathX=W/2-pathW/2;
   px2(0,0,pathX,H,'#6fc060');px2(pathX+pathW,0,W-(pathX+pathW),H,'#6fc060');
   px2(pathX,0,pathW,H,'#9a8f7c');px2(pathX,0,6,H,'#b0a690');px2(pathX+pathW-6,0,6,H,'#857c6a');
   for(let yy=((-camY)%48+48)%48; yy<H; yy+=48)px2(W/2-4,yy,8,22,'#ffd24d');
@@ -227,12 +286,18 @@ function loop(ts){
     const wy=jobY(i)-camY;
     if(wy>-160 && wy<H+160){
       const side=(i%2)? -1: 1;                 // right/left of path
-      const cx=W/2 + side*(pathW/2+70);
-      drawBuilding(j,cx,wy+30);                 // base near the plot line
-      // little connector from path to plot
-      px2(W/2,wy+24,side*(pathW/2+ (side>0?0:0)),6,'#857c6a');
+      // center each building within its verge (space between road edge and rail edge)
+      const vergeMid=(pathW/2 + W/2)/2;
+      const cx=W/2 + side*vergeMid;
+      // connector from path to plot (draw first, behind building)
+      px2(W/2,wy+24,side*(pathW/2),6,'#857c6a');
+      // draw building scaled to fit the verge
+      ctx.save();
+      ctx.translate(cx,wy+30);ctx.scale(0.82,0.82);ctx.translate(-cx,-(wy+30));
+      drawBuilding(j,cx,wy+30);
+      ctx.restore();
       // year marker post on the road
-      px2(W/2-22,wy-2,44,18,'#000');ctx.fillStyle='#E8FE5B';ctx.font='9px "Press Start 2P"';ctx.textAlign='center';ctx.fillText(j.yr,W/2,wy+11);
+      px2(W/2-22,wy-2,44,18,'#0a1120');ctx.fillStyle='#F0A830';ctx.font='9px "Press Start 2P"';ctx.textAlign='center';ctx.fillText(j.yr,W/2,wy+11);
     }
   });
 
