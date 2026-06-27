@@ -15,7 +15,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
-.app{display:flex;flex-direction:column;height:100vh}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 .head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #1d1d20;flex:0 0 auto}
 .hl{display:flex;align-items:center;gap:8px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
@@ -106,18 +106,25 @@ SUGGESTED.forEach(q=>{
 });
 
 function scrollDown(){ stage.scrollTop = stage.scrollHeight; }
+function scrollRowToTop(row){
+  if(!row) return;
+  stage.scrollTo({ top: row.offsetTop - stage.offsetTop - 8, behavior: 'smooth' });
+}
 
 function addUser(text){
   const row=document.createElement('div');row.className='rowU';
   const b=document.createElement('div');b.className='bU';b.textContent=text;
-  row.appendChild(b);stage.appendChild(row);scrollDown();
+  row.appendChild(b);stage.appendChild(row);scrollRowToTop(row);
+  return row;
 }
 function addBot(text){
   const row=document.createElement('div');row.className='rowB';
   const tag=document.createElement('div');tag.className='tag';tag.textContent='RAVI-OS';
   const b=document.createElement('div');b.className='bB';
   text.split('\n').forEach(line=>{const p=document.createElement('p');p.textContent=line;b.appendChild(p);});
-  row.appendChild(tag);row.appendChild(b);stage.appendChild(row);scrollDown();
+  row.appendChild(tag);row.appendChild(b);stage.appendChild(row);
+}
+  
 }
 function addThinking(){
   const row=document.createElement('div');row.className='rowB';row.id='thinking';
