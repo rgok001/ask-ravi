@@ -124,8 +124,7 @@ function addBot(text){
   text.split('\n').forEach(line=>{const p=document.createElement('p');p.textContent=line;b.appendChild(p);});
   row.appendChild(tag);row.appendChild(b);stage.appendChild(row);
 }
-  
-}
+
 function addThinking(){
   const row=document.createElement('div');row.className='rowB';row.id='thinking';
   const tag=document.createElement('div');tag.className='tag';tag.textContent='RAVI-OS';
