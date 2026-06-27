@@ -4,170 +4,266 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ask Ravi — RAVI-OS</title>
-<meta name="description" content="Don't read Ravi Gokal's CV. Interrogate it. An AI that knows his career, answering on the record." />
-<!-- Social preview (LinkedIn/Twitter) -->
-<meta property="og:title" content="Ask Ravi — an interview with the work of Ravi Gokal" />
-<meta property="og:description" content="Don't read his CV. Interrogate it. Ask the AI anything about his career." />
+<meta name="description" content="Ask an AI that knows Ravi Gokal's whole career — and walk it in 16-bit on the side." />
+<meta property="og:title" content="Ask Ravi — RAVI-OS" />
+<meta property="og:description" content="An AI that knows his career, answering on the record. Walk the timeline while you ask." />
 <meta property="og:type" content="website" />
-<!-- Vercel Web Analytics -->
-<script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/insights/script.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
-:root{ --accent:#E8FE5B; --bg:#0B0B0C; --ink:#F4F4F0; }
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+:root{--accent:#E8FE5B}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
-.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
-.head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #1d1d20;flex:0 0 auto}
-.hl{display:flex;align-items:center;gap:8px}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
-.os{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px}
-.ver{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a6a70;border:1px solid #2a2a2e;border-radius:4px;padding:1px 5px}
-.hr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a6a70;letter-spacing:1px;text-transform:uppercase}
-.stage{flex:1 1 auto;overflow-y:auto;padding:28px 20px 8px;display:flex;flex-direction:column;gap:18px;max-width:820px;width:100%;margin:0 auto}
-.kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:3px;color:#8a8a90;margin-bottom:18px}
-h1{font-weight:700;font-size:clamp(2.6rem,8vw,5rem);line-height:.96;letter-spacing:-.02em}
-h1 .a{color:var(--accent)}
-.sub{font-size:clamp(1rem,2.4vw,1.25rem);line-height:1.5;color:#bcbcc0;max-width:560px;margin-top:24px}
-.cue{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);margin-top:28px;letter-spacing:1px}
-.rowU{display:flex;justify-content:flex-end}
-.rowB{display:flex;flex-direction:column;gap:6px}
+body{background:#0B0B0C;color:#F4F4F0;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+
+/* layout: game rail (left) + chat (right) */
+#app{display:flex;height:100vh;height:100dvh}
+
+/* ---- vertical game rail ---- */
+#rail-game{flex:0 0 300px;display:flex;flex-direction:column;border-right:1px solid #1d1d20;background:#bfe6f5;position:relative}
+.rg-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#0B0B0C;border-bottom:1px solid #1d1d20}
+.rg-head .t{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--accent)}
+.rg-head .y{font-family:'Press Start 2P',monospace;font-size:11px;color:#fff;background:#000;border:2px solid #333;border-radius:3px;padding:4px 7px}
+#gwrap{flex:1;position:relative;overflow:hidden}
+canvas#game{position:absolute;inset:0;width:100%;height:100%}
+#gprompt{position:absolute;bottom:64px;left:0;right:0;text-align:center;z-index:5;font-family:'Press Start 2P',monospace;font-size:8px;color:#0B0B0C;background:rgba(232,254,91,.85);margin:0 30px;padding:6px 4px;border-radius:4px;animation:bl 1.1s steps(2) infinite}
+@keyframes bl{50%{opacity:.45}}
+/* job card pops over the rail */
+#jobcard{position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%) scale(.92);z-index:8;
+  background:#13110f;border:3px solid var(--accent);border-radius:6px;padding:14px 14px;box-shadow:0 0 0 3px #000,6px 6px 0 rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+#jobcard.show{opacity:1;transform:translateY(-50%) scale(1)}
+#jobcard .yr{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--accent)}
+#jobcard .org{font-family:'Press Start 2P',monospace;font-size:11px;margin:8px 0 6px;line-height:1.4;color:#fff}
+#jobcard .role{font-weight:700;font-size:.98rem}
+#jobcard .blurb{margin-top:7px;font-size:.86rem;line-height:1.45;color:#cfc6b6}
+#jobcard .x{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a6a70;margin-top:10px}
+/* vertical controls */
+#gcontrols{display:flex;justify-content:center;gap:14px;padding:12px;background:#0B0B0C;border-top:1px solid #1d1d20}
+.btn{font-family:'Press Start 2P',monospace;font-size:12px;color:#0B0B0C;background:var(--accent);border:3px solid #000;border-radius:6px;padding:12px 18px;cursor:pointer;box-shadow:3px 3px 0 #000;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+
+/* ---- chat (the star) ---- */
+#chat{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid #1d1d20}
+.chat-head .os{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:1px;color:#F4F4F0}
+.chat-head .os .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);margin-right:7px}
+.chat-head .hr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a6a70;letter-spacing:1px;text-transform:uppercase}
+.intro-card{max-width:760px;margin:0 auto;width:100%;padding:36px 22px 6px}
+.intro-card h1{font-family:'Space Grotesk';font-weight:700;font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.05;color:#F4F4F0}
+.intro-card h1 .a{color:var(--accent)}
+.intro-card p{margin-top:14px;color:#bcbcc0;font-size:1.08rem;line-height:1.5;max-width:560px}
+#thread{flex:1;overflow-y:auto;padding:14px 22px;display:flex;flex-direction:column;gap:16px;max-width:760px;width:100%;margin:0 auto}
+.rowU{display:flex;justify-content:flex-end}.rowB{display:flex;flex-direction:column;gap:6px}
 .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent)}
-.bU{background:#1b1b1f;border:1px solid #2a2a2e;border-radius:14px 14px 2px 14px;padding:12px 16px;max-width:80%;font-size:1.02rem;line-height:1.45}
-.bB{border-left:2px solid var(--accent);padding-left:16px;max-width:92%;font-size:1.08rem;line-height:1.55;color:#ECECE8}
+.bU{background:#1b1b1f;border:1px solid #2a2a2e;border-radius:14px 14px 2px 14px;padding:11px 15px;max-width:80%;font-size:1.02rem;line-height:1.45;color:#F4F4F0}
+.bB{border-left:2px solid var(--accent);padding-left:15px;max-width:92%;font-size:1.06rem;line-height:1.55;color:#ECECE8}
 .bB p{margin:0 0 .6em}
-.rail{display:flex;gap:8px;overflow-x:auto;padding:10px 20px;flex:0 0 auto;max-width:820px;width:100%;margin:0 auto}
-.chip{white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#d8d8d4;background:transparent;border:1px solid #2e2e33;border-radius:40px;padding:7px 14px;cursor:pointer;transition:.15s}
-.chip:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-.composer{display:flex;align-items:center;gap:10px;padding:14px 20px;border-top:1px solid #1d1d20;flex:0 0 auto;max-width:820px;width:100%;margin:0 auto}
-.composer input{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:1rem}
-.send{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--bg);background:var(--accent);border:none;border-radius:8px;padding:9px 16px;cursor:pointer;letter-spacing:1px}
-.send:hover:not(:disabled){filter:brightness(1.08)}
-.send:disabled,.chip:disabled{opacity:.4;cursor:default}
-.blink{animation:blink 1.2s steps(2) infinite}
-@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:4px}
-@media (prefers-reduced-motion:reduce){.blink{animation:none}}
-a{color:var(--accent)}
+#chips{display:flex;gap:8px;overflow-x:auto;padding:8px 22px;max-width:760px;width:100%;margin:0 auto}
+.chip{white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#d8d8d4;background:transparent;border:1px solid #2e2e33;border-radius:40px;padding:8px 15px;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.composer{display:flex;align-items:center;gap:10px;padding:14px 22px 20px;border-top:1px solid #1d1d20;max-width:760px;width:100%;margin:0 auto}
+.composer input{flex:1;background:transparent;border:none;outline:none;color:#F4F4F0;font-family:'JetBrains Mono',monospace;font-size:1rem}
+.send{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:#0B0B0C;background:var(--accent);border:none;border-radius:8px;padding:9px 16px;cursor:pointer;letter-spacing:1px}
+.send:disabled{opacity:.4}
+.blink{animation:bl 1.2s steps(2) infinite}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#2a2a2e;border-radius:4px}
+
+/* MOBILE: no game, chat only */
+@media(max-width:780px){
+  #rail-game{display:none}
+  body{overflow:auto}
+  .walknote{display:none}
+}
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="head">
-    <div class="hl"><span class="dot"></span><span class="os">RAVI-OS</span><span class="ver">v1.0</span></div>
-    <div class="hr">an interview with the work of ravi gokal</div>
-  </header>
+<div id="app">
 
-  <main class="stage" id="stage">
-    <div id="hero">
-      <div class="kicker">SENIOR BUSINESS ANALYST · DELIVERY LEAD</div>
-      <h1>Don't read<br>my CV.<br><span class="a">Interrogate it.</span></h1>
-      <p class="sub">Thanks for stopping by. Instead of scrolling through a CV, you can just ask.
-        I've spent 13 years as a business analyst across government and beyond — go ahead and
-        ask me about any of it.</p>
-      <div class="cue">↓ pick a question, or type your own</div>
+  <!-- vertical game rail -->
+  <aside id="rail-game">
+    <div class="rg-head"><span class="t">CAREER WALK</span><span class="y" id="ytag">2025</span></div>
+    <div id="gwrap">
+      <canvas id="game"></canvas>
+      <div id="gprompt">▼ WALK DOWN = BACK IN TIME</div>
+      <div id="jobcard">
+        <div class="yr" id="jc-yr"></div>
+        <div class="org" id="jc-org"></div>
+        <div class="role" id="jc-role"></div>
+        <div class="blurb" id="jc-blurb"></div>
+        <div class="x">keep walking ▼</div>
+      </div>
     </div>
-  </main>
+    <div id="gcontrols">
+      <div class="btn" id="bUp">▲</div>
+      <div class="btn" id="bDown">▼</div>
+    </div>
+  </aside>
 
-  <div class="rail" id="rail"></div>
+  <!-- chat -->
+  <section id="chat">
+    <div class="chat-head">
+      <div class="os"><span class="dot"></span>RAVI-OS v1.0</div>
+      <div class="hr">an interview with the work of ravi gokal</div>
+    </div>
+    <div class="intro-card">
+      <h1>Don't read my CV. <span class="a">Interrogate it.</span></h1>
+      <p>Thanks for stopping by. Instead of scrolling through a CV, you can just ask. I've spent 13 years as a business analyst across government and beyond. Go ahead and ask me about any of it. <span class="walknote" style="color:#6a6a70">(Walk the timeline on the left while you're at it.)</span></p>
+    </div>
+    <div id="chips"></div>
+    <div id="thread"></div>
+    <div class="composer">
+      <span style="color:var(--accent);font-weight:700">›</span>
+      <input id="input" placeholder="ask about ravi…" aria-label="Ask about Ravi" />
+      <button class="send" id="send">ASK →</button>
+    </div>
+  </section>
 
-  <div class="composer">
-    <span style="color:var(--accent);font-weight:700">›</span>
-    <input id="input" placeholder="ask about ravi…" aria-label="Ask about Ravi" />
-    <button class="send" id="send">ASK →</button>
-  </div>
 </div>
 
 <script>
-// If you host frontend + backend together on Vercel, leave this as "/api/ask".
-// If you host the page elsewhere, set it to your full URL e.g. "https://ask-ravi.vercel.app/api/ask"
-const API_URL = "/api/ask";
+const API_URL="/api/ask";
 
-const SUGGESTED = [
-  "Why should I hire Ravi?",
-  "Tell me about his security work",
-  "What's his biggest cost saving?",
-  "Has he led teams?",
-  "How does he use AI in his work?",
-  "Is he good with stakeholders?",
+// top(present) → bottom(past)
+const JOBS=[
+  {yr:"2025",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"commission",col:"#7a4a73"},
+  {yr:"2024",org:"MINISTRY OF\nJUSTICE",role:"Senior BA · Integration Lead",blurb:"Leading integration on Te Au Reka — a cloud-native case system for NZ courts. A support strategy endorsed by the judiciary.",building:"courthouse",col:"#c9b890"},
+  {yr:"2023",org:"FOREIGN\nAFFAIRS",role:"Senior BA · Cloud Transformation",blurb:"Secure-by-design Microsoft 365 for a high-threat ministry. Migrating sensitive content, hardening to NZISM, securing funding.",building:"embassy",col:"#2f7d72"},
+  {yr:"2022",org:"NEW ZEALAND\nPOLICE",role:"Senior Business Analyst",blurb:"The million-dollar saving. Reshaped M365 licensing and a 170+ TB email migration — recommending a solution saving over $1M a year.",building:"police",col:"#26407a"},
+  {yr:"2020",org:"NZ TRANSPORT\nAGENCY",role:"Lead Business Analyst",blurb:"Lead BA on a cloud-native roadside enforcement platform — IoT sensors, ANPR cameras, smart signs. Product Owner & mentor.",building:"transport",col:"#c46a1a"},
+  {yr:"2018",org:"MSD · TEC",role:"Business Analyst",blurb:"Kept myMSD alive through outages with an operational data lake; stepped in as Scrum Master. Then automation & M365 rollout at TEC.",building:"govhall",col:"#5a6a3a"},
+  {yr:"2014",org:"BECA · UNI ·\nDAVANTI",role:"Consultant / BA",blurb:"Finding range. ICT asset plans for government, the University's first Scrum squad, marketing-automation readiness for a distributor.",building:"university",col:"#8a6a4a"},
+  {yr:"2012",org:"HEALTH\nALLIANCE",role:"Business Analyst",blurb:"Early days. Oracle inventory management to hospital theatres and wards across two DHBs — 'business analyst extraordinaire'.",building:"hospital",col:"#d8d8e0"},
+  {yr:"2011",org:"NORTH\nPOWER",role:"Process Analyst",blurb:"The first rung. Mapping operational processes in the utilities sector — the very first analyst role, where the story begins.",building:"powerplant",col:"#9a7a3a"},
 ];
 
-const stage = document.getElementById('stage');
-const rail = document.getElementById('rail');
-const input = document.getElementById('input');
-const send = document.getElementById('send');
-let messages = [];
-let loading = false;
-let started = false;
+const cv=document.getElementById('game'),ctx=cv.getContext('2d');
+let W=0,H=0,DPR=Math.min(2,devicePixelRatio||1);
+function resize(){const g=document.getElementById('gwrap');const r=g.getBoundingClientRect();W=Math.max(200,r.width||g.offsetWidth||300);H=Math.max(300,r.height||g.offsetHeight||500);cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);addEventListener('load',resize);
 
-SUGGESTED.forEach(q=>{
-  const b=document.createElement('button');
-  b.className='chip';b.textContent=q;
-  b.onclick=()=>ask(q);
-  rail.appendChild(b);
-});
+const STATION_GAP=300;
+const WORLD_LEN=(JOBS.length-1)*STATION_GAP+520;
+let py=180;                       // player world-Y (starts near top/present)
+let facing=1, moving=false, frame=0, ftime=0;
+const SPEED=2.4;
+let activeJob=-1, cardLock=false, hasMoved=false;
+function jobY(i){ return 180 + i*STATION_GAP; }   // job 0 (2025) near top
 
-function scrollDown(){ stage.scrollTop = stage.scrollHeight; }
-function scrollRowToTop(row){
-  if(!row) return;
-  stage.scrollTo({ top: row.offsetTop - stage.offsetTop - 8, behavior: 'smooth' });
+const keys={};
+addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown'){keys[e.key]=true;e.preventDefault();}});
+addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown')keys[e.key]=false;});
+function hold(btn,key){const on=e=>{e.preventDefault();keys[key]=true;};const off=e=>{e.preventDefault();keys[key]=false;};
+  btn.addEventListener('touchstart',on,{passive:false});btn.addEventListener('touchend',off);btn.addEventListener('touchcancel',off);
+  btn.addEventListener('mousedown',on);btn.addEventListener('mouseup',off);btn.addEventListener('mouseleave',off);}
+hold(document.getElementById('bUp'),'ArrowUp');
+hold(document.getElementById('bDown'),'ArrowDown');
+
+const ytag=document.getElementById('ytag'),card=document.getElementById('jobcard'),gprompt=document.getElementById('gprompt');
+function showCard(i){activeJob=i;const j=JOBS[i];document.getElementById('jc-yr').textContent=j.yr;document.getElementById('jc-org').textContent=j.org.replace('\n',' ');document.getElementById('jc-role').textContent=j.role;document.getElementById('jc-blurb').textContent=j.blurb;card.classList.add('show');gprompt.style.opacity=0;}
+function hideCard(){card.classList.remove('show');activeJob=-1;gprompt.style.opacity=1;}
+card.addEventListener('click',()=>{hideCard();cardLock=true;});
+
+// drawing helpers
+function px2(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function shade(hex,a){let n=parseInt(hex.slice(1),16);let r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return`rgb(${r},${g},${b})`;}
+function box3d(bx,by,bw,bh,c){px2(bx,by,bw,bh,c);px2(bx,by,bw,5,shade(c,28));px2(bx,by,5,bh,shade(c,18));px2(bx+bw-5,by,5,bh,shade(c,-28));}
+function windows(bx,by,bw,bh,c,gx,gy){for(let wy=by+12;wy<by+bh-16;wy+=(gy||26))for(let wx=bx+12;wx<bx+bw-18;wx+=(gx||26)){px2(wx,wy,13,15,'#0d0d18');px2(wx+2,wy+2,9,5,shade(c,75));}}
+function door(sx,gy,c){px2(sx-12,gy-26,24,26,shade(c,-40));px2(sx-9,gy-22,18,22,'#0d0d18');}
+
+// compact building drawer (centered at sx, base at by+bh => groundline)
+function drawBuilding(j,cx,baseY){
+  const c=j.col,dk=shade(c,-34),lt=shade(c,30),t=j.building,sx=cx;
+  function B(bw,bh){const bx=sx-bw/2,by=baseY-bh;box3d(bx,by,bw,bh,c);return [bx,by,bw,bh];}
+  if(t==='powerplant'){const[bx,by,bw,bh]=B(120,70);windows(bx,by,bw,bh,c,30,26);for(const ox of[-36,36]){px2(sx+ox-13,by-44,26,44,shade(c,-10));px2(sx+ox-15,by-48,30,7,dk);}ctx.fillStyle='#ffe14d';ctx.beginPath();ctx.moveTo(sx+3,by-58);ctx.lineTo(sx-6,by-38);ctx.lineTo(sx,by-38);ctx.lineTo(sx-4,by-22);ctx.lineTo(sx+9,by-44);ctx.lineTo(sx+1,by-44);ctx.closePath();ctx.fill();door(sx,baseY,c);}
+  else if(t==='hospital'){const[bx,by,bw,bh]=B(118,116);windows(bx,by,bw,bh,'#9aa',28,26);px2(bx,by,bw,8,'#e8e8f0');px2(sx-4,by-30,8,24,'#d23');px2(sx-12,by-22,24,8,'#d23');px2(sx-34,baseY-24,68,7,shade(c,-20));door(sx,baseY,'#bbb');}
+  else if(t==='university'){const[bx,by,bw,bh]=B(116,104);for(let ry=by+8;ry<by+bh;ry+=12)px2(bx,ry,bw,2,shade(c,-18));windows(bx,by,bw,bh,'#caa',26,26);ctx.fillStyle=shade(c,-10);ctx.beginPath();ctx.arc(sx,by-1,20,Math.PI,2*Math.PI);ctx.fill();px2(sx-2,by-34,4,14,'#caa');px2(sx-7,by-16,14,14,'#f4ecd0');px2(sx-1,by-12,2,7,'#333');px2(sx-34,baseY-7,68,7,shade(c,-24));door(sx,baseY,c);}
+  else if(t==='govhall'){const[bx,by,bw,bh]=B(120,112);windows(bx,by,bw,bh,c,26,26);px2(bx-3,by,bw+6,9,dk);px2(sx+44,by-38,3,38,'#888');px2(sx+47,by-38,20,12,'#3a6ea5');px2(sx-28,baseY-34,56,7,dk);for(const ox of[-22,-6,8,22])px2(sx+ox,baseY-34,7,34,shade(c,-12));door(sx,baseY,c);}
+  else if(t==='transport'){const[bx,by,bw,bh]=B(112,66);windows(bx,by,bw,bh,c,28,24);px2(bx-14,baseY-9,bw+28,9,'#2a2a2e');for(let i=bx-10;i<bx+bw+18;i+=22)px2(i,baseY-6,11,3,'#ffd24d');px2(sx-46,by-36,92,7,'#555');px2(sx-46,by-36,7,36,'#555');px2(sx+40,by-36,7,36,'#555');px2(sx-8,by-46,16,10,'#222');px2(sx+8,by-43,5,4,'#9ad');ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx-34,by-24,10,0,7);ctx.fill();ctx.strokeStyle='#c22';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(sx-34,by-24,10,0,7);ctx.stroke();ctx.fillStyle='#222';ctx.font='6px "Press Start 2P"';ctx.textAlign='center';ctx.fillText('50',sx-34,by-21);door(sx,baseY,c);}
+  else if(t==='police'){const[bx,by,bw,bh]=B(120,116);windows(bx,by,bw,bh,c,26,26);px2(bx,by,bw,8,dk);for(const ox of[-26,26]){px2(sx+ox-4,baseY-38,9,11,'#3a6ee8');px2(sx+ox-2,baseY-40,5,4,'#9ac4ff');}for(let i=0;i<bw/12;i++)px2(bx+i*12,by+bh-20,12,7,(i%2)?'#fff':'#1a2a5a');ctx.fillStyle='#ffd24d';ctx.beginPath();ctx.moveTo(sx,by-36);ctx.lineTo(sx-10,by-29);ctx.lineTo(sx-10,by-16);ctx.lineTo(sx,by-10);ctx.lineTo(sx+10,by-16);ctx.lineTo(sx+10,by-29);ctx.closePath();ctx.fill();door(sx,baseY,'#16264a');}
+  else if(t==='embassy'){const[bx,by,bw,bh]=B(116,84);windows(bx,by,bw,bh,c,26,24);px2(bx,by,bw,7,shade(c,30));const gx=sx,gy=by-34,gr=32;ctx.fillStyle='#3aa0d8';ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.fill();ctx.fillStyle='#2a90c8';ctx.beginPath();ctx.arc(gx,gy,gr,0.3,Math.PI-0.3);ctx.fill();ctx.fillStyle='#5fc26a';px2(gx-21,gy-14,13,9,'#5fc26a');px2(gx-11,gy-6,8,14,'#5fc26a');px2(gx+3,gy-17,14,8,'#5fc26a');px2(gx+8,gy-9,11,12,'#5fc26a');px2(gx-5,gy+9,9,6,'#5fc26a');ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.moveTo(gx-gr,gy);ctx.lineTo(gx+gr,gy);ctx.ellipse(gx,gy,gr*0.5,gr,0,0,7);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(gx-11,gy-11,5,0,7);ctx.fill();door(sx,baseY,c);}
+  else if(t==='courthouse'){const[bx,by,bw,bh]=B(120,98);ctx.fillStyle=shade(c,-12);ctx.beginPath();ctx.moveTo(bx-5,by);ctx.lineTo(sx,by-32);ctx.lineTo(bx+bw+5,by);ctx.closePath();ctx.fill();for(let i=0;i<5;i++){const colx=bx+14+i*24;px2(colx,by+5,11,bh-24,shade(c,22));px2(colx,by+5,11,3,shade(c,-10));px2(colx,by+bh-22,11,3,shade(c,-10));}px2(bx-5,by+bh-19,bw+10,7,shade(c,-20));px2(sx-1,by-27,2,13,'#3a2d12');px2(sx-10,by-24,20,2,'#3a2d12');px2(sx-10,by-22,3,4,'#ffd24d');px2(sx+7,by-22,3,4,'#ffd24d');door(sx,baseY,shade(c,-30));}
+  else {const[bx,by,bw,bh]=B(92,150);for(let wx=bx+8;wx<bx+bw-13;wx+=20){px2(wx,by+10,13,bh-20,'#0d0d18');for(let wy=by+14;wy<by+bh-14;wy+=15)px2(wx+2,wy,9,6,shade(c,75));}px2(bx,by,bw,8,shade(c,40));px2(sx-1,by-24,2,24,dk);px2(sx-5,by-24,10,3,lt);door(sx,baseY,c);}
 }
 
-function addUser(text){
-  const row=document.createElement('div');row.className='rowU';
-  const b=document.createElement('div');b.className='bU';b.textContent=text;
-  row.appendChild(b);stage.appendChild(row);scrollRowToTop(row);
-  return row;
-}
-function addBot(text){
-  const row=document.createElement('div');row.className='rowB';
-  const tag=document.createElement('div');tag.className='tag';tag.textContent='RAVI-OS';
-  const b=document.createElement('div');b.className='bB';
-  text.split('\n').forEach(line=>{const p=document.createElement('p');p.textContent=line;b.appendChild(p);});
-  row.appendChild(tag);row.appendChild(b);stage.appendChild(row);
-}
-
-function addThinking(){
-  const row=document.createElement('div');row.className='rowB';row.id='thinking';
-  const tag=document.createElement('div');tag.className='tag';tag.textContent='RAVI-OS';
-  const b=document.createElement('div');b.className='bB';
-  b.innerHTML='<span class="blink">thinking</span><span class="blink" style="animation-delay:.2s">.</span><span class="blink" style="animation-delay:.4s">.</span><span class="blink" style="animation-delay:.6s">.</span>';
-  row.appendChild(tag);row.appendChild(b);stage.appendChild(row);scrollDown();
-}
-function removeThinking(){ const t=document.getElementById('thinking'); if(t) t.remove(); }
-
-async function ask(q){
-  q=(q||'').trim();
-  if(!q||loading) return;
-  if(!started){ const h=document.getElementById('hero'); if(h) h.remove(); started=true; }
-  input.value='';
-  addUser(q);
-  messages.push({role:'user',content:q});
-  loading=true; send.disabled=true; addThinking();
-  try{
-    const res=await fetch(API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages})
-    });
-    const data=await res.json();
-    removeThinking();
-    const text=data.text||data.error||'…';
-    addBot(text);
-    messages.push({role:'assistant',content:text});
-  }catch(e){
-    removeThinking();
-    addBot("[ connection unavailable ] RAVI-OS needs its backend to answer freely. In the meantime: Ravi is a Senior BA & Delivery Lead with 13+ years across NZ government — secure cloud migrations, IoT enforcement platforms, and an M365 journal migration that saved over $1M a year. Reach him at ravi.gokal@gmail.com.");
-  }finally{
-    loading=false; send.disabled=false; input.focus();
-  }
+// vertical character (walking down/up)
+function drawHero(cx,cy,step){
+  const skin='#d9a066',shirt='#3a7d72',pants='#33304a',hair='#2a1d12',bag='#8a5a2a';
+  const x=cx-11,y=cy-24;
+  px2(x+4,y+30,6,13+(step?-2:0),pants);px2(x+12,y+30,6,13+(step?0:-2),pants);
+  px2(x+3,y+42-(step?2:0),8,4,'#222');px2(x+12,y+42-(step?0:2),8,4,'#222');
+  px2(x+3,y+12,16,20,shirt);px2(x+3,y+12,3,20,shade(shirt,25));
+  px2(x+16,y+16,7,10,bag);
+  px2(x,y+14,4,13,shirt);px2(x+19,y+14,4,13,shirt);
+  px2(x+5,y,13,13,skin);px2(x+4,y-2,15,6,hair);
+  px2(x+7,y+5,3,3,'#222');px2(x+13,y+5,3,3,'#222'); // facing camera (down)
 }
 
-send.onclick=()=>ask(input.value);
-input.addEventListener('keydown',e=>{ if(e.key==='Enter') ask(input.value); });
+let last=0;
+function loop(ts){
+  const dt=Math.min(40,ts-last);last=ts;
+  moving=false;
+  if(keys['ArrowUp']&&hasMoved){py-=SPEED*dt/16;moving=true;}
+  if(keys['ArrowDown']){py+=SPEED*dt/16;moving=true;hasMoved=true;}
+  py=Math.max(120,Math.min(WORLD_LEN-80,py));
+  if(moving){ftime+=dt;if(ftime>120){frame^=1;ftime=0;}}else frame=0;
+
+  const camY=py-H*0.42;                       // camera follows player vertically
+  const prog=(py-120)/(WORLD_LEN-200);        // 0 present(top) .. 1 past(bottom)
+
+  // bright sky
+  const grd=ctx.createLinearGradient(0,0,0,H);grd.addColorStop(0,'#6fc0ee');grd.addColorStop(0.7,'#bfe6f5');grd.addColorStop(1,'#e8f4d8');
+  ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+  // clouds (parallax)
+  for(let i=0;i<6;i++){const cy=((i*220 - camY*0.2)%(H+200)+ (H+200))%(H+200)-100;const cx=(i*97)%W;px2(cx,cy,30,9,'rgba(255,255,255,.85)');px2(cx+10,cy-7,28,9,'rgba(255,255,255,.85)');}
+  // grass verges + vertical road down the middle
+  const pathW=120, pathX=W/2-pathW/2;
+  px2(0,0,pathX,H,'#6fc060');px2(pathX+pathW,0,W-(pathX+pathW),H,'#6fc060');
+  px2(pathX,0,pathW,H,'#9a8f7c');px2(pathX,0,6,H,'#b0a690');px2(pathX+pathW-6,0,6,H,'#857c6a');
+  for(let yy=((-camY)%48+48)%48; yy<H; yy+=48)px2(W/2-4,yy,8,22,'#ffd24d');
+
+  // buildings on alternating sides along the path
+  JOBS.forEach((j,i)=>{
+    const wy=jobY(i)-camY;
+    if(wy>-160 && wy<H+160){
+      const side=(i%2)? -1: 1;                 // right/left of path
+      const cx=W/2 + side*(pathW/2+70);
+      drawBuilding(j,cx,wy+30);                 // base near the plot line
+      // little connector from path to plot
+      px2(W/2,wy+24,side*(pathW/2+ (side>0?0:0)),6,'#857c6a');
+      // year marker post on the road
+      px2(W/2-22,wy-2,44,18,'#000');ctx.fillStyle='#E8FE5B';ctx.font='9px "Press Start 2P"';ctx.textAlign='center';ctx.fillText(j.yr,W/2,wy+11);
+    }
+  });
+
+  // hero on the path
+  drawHero(W/2, py-camY, frame);
+
+  // nearest job → year tag + card
+  let best=0,bd=1e9;JOBS.forEach((j,i)=>{const d=Math.abs(py-jobY(i));if(d<bd){bd=d;best=i;}});
+  ytag.textContent=JOBS[best].yr;
+  if(bd<46 && activeJob<0 && !cardLock && hasMoved){showCard(best);cardLock=true;}
+  if(bd>96){cardLock=false;if(activeJob>=0)hideCard();}
+
+  requestAnimationFrame(loop);
+}
+resize();requestAnimationFrame(loop);setTimeout(resize,60);setTimeout(resize,300);
+
+// ===== chat =====
+const SUGGESTED=["Why should I hire Ravi?","Tell me about his security work","What's his biggest cost saving?","Has he led teams?","How does he use AI in his work?","What do people say about him?"];
+const chips=document.getElementById('chips'),thread=document.getElementById('thread'),input=document.getElementById('input'),send=document.getElementById('send');
+let messages=[],loading=false,started=false;
+SUGGESTED.forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;b.onclick=()=>ask(q);chips.appendChild(b);});
+function down(){thread.scrollTop=thread.scrollHeight;}
+function addU(t){const r=document.createElement('div');r.className='rowU';const b=document.createElement('div');b.className='bU';b.textContent=t;r.appendChild(b);thread.appendChild(r);down();}
+function addB(t){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';t.split('\n').forEach(l=>{const p=document.createElement('p');p.textContent=l;b.appendChild(p);});r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
+function addT(){const r=document.createElement('div');r.className='rowB';r.id='th';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.innerHTML='<span class="blink">thinking</span><span class="blink" style="animation-delay:.3s">.</span><span class="blink" style="animation-delay:.6s">.</span>';r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
+function rmT(){const t=document.getElementById('th');if(t)t.remove();}
+async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
+  try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});}
+  catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government — secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
+  finally{loading=false;send.disabled=false;input.focus();}}
+send.onclick=()=>ask(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value);});
 </script>
 </body>
 </html>
