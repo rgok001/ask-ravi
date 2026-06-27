@@ -1,0 +1,7 @@
+{
+  "name": "ask-ravi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RAVI-OS — a CV that talks back. Conversational AI representative for Ravi Gokal.",
+  "engines": { "node": ">=18" }
+}
