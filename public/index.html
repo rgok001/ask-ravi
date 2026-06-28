@@ -400,7 +400,10 @@ let messages=[],loading=false,started=false;
 SUGGESTED.forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;b.onclick=()=>ask(q);chips.appendChild(b);});
 function down(){thread.scrollTop=thread.scrollHeight;}
 function addU(t){const r=document.createElement('div');r.className='rowU';const b=document.createElement('div');b.className='bU';b.textContent=t;r.appendChild(b);thread.appendChild(r);down();}
-function addB(t){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';t.split('\n').forEach(l=>{const p=document.createElement('p');p.textContent=l;b.appendChild(p);});r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
+function addB(t){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';t.split('\n').forEach(l=>{const p=document.createElement('p');p.textContent=l;b.appendChild(p);});r.appendChild(g);r.appendChild(b);thread.appendChild(r);
+  // scroll so the START of the answer is at the top of the view (not the bottom)
+  requestAnimationFrame(()=>{thread.scrollTo({top:Math.max(0,r.offsetTop-thread.offsetTop-8),behavior:'smooth'});});
+}
 function addT(){const r=document.createElement('div');r.className='rowB';r.id='th';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.innerHTML='<span class="blink">thinking</span><span class="blink" style="animation-delay:.3s">.</span><span class="blink" style="animation-delay:.6s">.</span>';r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
 function rmT(){const t=document.getElementById('th');if(t)t.remove();}
 async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
