@@ -130,7 +130,7 @@ const API_URL="/api/ask";
 
 // top(present) → bottom(past)
 const JOBS=[
-  {yr:"2025",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"tribunal",col:"#3a5a7a"},
+  {yr:"2025–NOW",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"tribunal",col:"#3a5a7a"},
   {yr:"2025",org:"FOREIGN AFFAIRS\n(SECURITY)",role:"Senior BA · Security Consultant",blurb:"Security uplift for a high-threat global ministry — modernising the mobile fleet from BlackBerry to Microsoft Intune, with tiered controls calibrated to each post's threat level.",building:"secure",col:"#3a6a5a"},
   {yr:"2024–25",org:"MINISTRY OF\nJUSTICE",role:"Senior BA · Integration Lead",blurb:"Leading integration on Te Au Reka — a cloud-native case system for NZ courts. A support strategy endorsed by the judiciary.",building:"courthouse",col:"#c9b890"},
   {yr:"2024",org:"NZ TRANSPORT\n(SAFETY CAMERAS)",role:"Senior BA · RFP Advisor",blurb:"Safety Camera Programme — defined the requirements to move speed-camera operations from Police to NZTA and out to an operator. Advised the procurement panel.",building:"camera",col:"#b85a8a"},
@@ -296,8 +296,10 @@ function loop(ts){
       ctx.translate(cx,wy+30);ctx.scale(0.82,0.82);ctx.translate(-cx,-(wy+30));
       drawBuilding(j,cx,wy+30);
       ctx.restore();
-      // year marker post on the road
-      px2(W/2-22,wy-2,44,18,'#0a1120');ctx.fillStyle='#F0A830';ctx.font='9px "Press Start 2P"';ctx.textAlign='center';ctx.fillText(j.yr,W/2,wy+11);
+      // year marker post on the road (auto-width to fit label)
+      ctx.font='9px "Press Start 2P"';ctx.textAlign='center';
+      const lbl=j.yr, lw=ctx.measureText(lbl).width, pw2=Math.max(44,lw+14);
+      px2(W/2-pw2/2,wy-2,pw2,18,'#0a1120');ctx.fillStyle='#F0A830';ctx.fillText(lbl,W/2,wy+11);
     }
   });
 
@@ -306,7 +308,7 @@ function loop(ts){
 
   // nearest job → year tag + card
   let best=0,bd=1e9;JOBS.forEach((j,i)=>{const d=Math.abs(py-jobY(i));if(d<bd){bd=d;best=i;}});
-  ytag.textContent=JOBS[best].yr;
+  ytag.textContent = best===0 ? "NOW" : JOBS[best].yr;
   if(bd<46 && activeJob<0 && !cardLock && hasMoved){showCard(best);cardLock=true;}
   if(bd>96){cardLock=false;if(activeJob>=0)hideCard();}
 
