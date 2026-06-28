@@ -130,18 +130,18 @@ const API_URL="/api/ask";
 
 // top(present) → bottom(past)
 const JOBS=[
-  {yr:"2025–NOW",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"tribunal",col:"#3a5a7a"},
+  {yr:"2025–NOW",org:"FAIR WORK\nCOMMISSION",role:"Lead Business Analyst",blurb:"Leading the BA effort on a Dynamics 365 build replacing legacy case management — a 200+ story backlog, AI tooling lifting the team's throughput.",building:"tribunal",col:"#5a8ec4"},
   {yr:"2025",org:"MINISTRY OF\nFOREIGN AFFAIRS",role:"Senior BA · Security Consultant",blurb:"Security uplift for a high-threat global ministry — modernising the mobile fleet from BlackBerry to Microsoft Intune, with tiered controls calibrated to each post's threat level.",building:"secure",col:"#3a6a5a"},
   {yr:"2024–25",org:"MINISTRY OF\nJUSTICE",role:"Senior BA · Integration Lead",blurb:"Leading integration on Te Au Reka — a cloud-native case system for NZ courts. A support strategy endorsed by the judiciary.",building:"courthouse",col:"#c9b890"},
   {yr:"2024",org:"NZ TRANSPORT\n(SAFETY CAMERAS)",role:"Senior BA · RFP Advisor",blurb:"Safety Camera Programme — defined the requirements to move speed-camera operations from Police to NZTA and out to an operator. Advised the procurement panel.",building:"camera",col:"#b85a8a"},
   {yr:"2023–24",org:"MINISTRY OF\nFOREIGN AFFAIRS",role:"Senior BA · Cloud Transformation",blurb:"Secure-by-design Microsoft 365 for a high-threat ministry. Migrating sensitive content, hardening to NZISM, securing funding.",building:"embassy",col:"#2f7d72"},
-  {yr:"2022–23",org:"NEW ZEALAND\nPOLICE",role:"Senior Business Analyst",blurb:"The million-dollar saving. Reshaped M365 licensing and a 170+ TB email migration — recommending a solution saving over $1M a year.",building:"police",col:"#26407a"},
+  {yr:"2022–23",org:"NEW ZEALAND\nPOLICE",role:"Senior Business Analyst",blurb:"The million-dollar saving. Reshaped M365 licensing and a 170+ TB email migration — recommending a solution saving over $1M a year.",building:"police",col:"#1f4aa8"},
   {yr:"2020–22",org:"NZ TRANSPORT\nAGENCY",role:"Lead Business Analyst",blurb:"Lead BA on a cloud-native roadside enforcement platform — IoT sensors, ANPR cameras, smart signs screening heavy vehicles. Product Owner & mentor.",building:"transport",col:"#c46a1a"},
   {yr:"2019–20",org:"TERTIARY EDUC.\nCOMMISSION",role:"Senior Business Analyst",blurb:"Recruitment automation (Springboard) and a Microsoft 365 rollout — config, workflow testing, change management and training.",building:"govhall",col:"#5a6a3a"},
   {yr:"2018–19",org:"MINISTRY OF\nSOCIAL DEV.",role:"Business Analyst",blurb:"Kept myMSD alive through outages with an operational data lake; stepped in as Scrum Master; led production defect triage. Also supported CYRAS.",building:"socialdev",col:"#4a7a8a"},
-  {yr:"2015–17",org:"UNIVERSITY OF\nAUCKLAND ·etc",role:"Business Analyst / Consultant",blurb:"Finding range. The University's first Scrum squad redeveloping its website and the scholarship system — plus contracts at Victoria University and Davanti.",building:"university",col:"#8a6a4a"},
-  {yr:"2012–14",org:"HEALTH\nALLIANCE",role:"Business Analyst",blurb:"Early days. Oracle inventory management to hospital theatres and wards across two DHBs — 'business analyst extraordinaire'.",building:"hospital",col:"#d8d8e0"},
-  {yr:"2011–12",org:"NORTH\nPOWER",role:"Process Analyst",blurb:"The first rung. Mapping operational processes in the utilities sector — the very first analyst role, where the story begins.",building:"powerplant",col:"#9a7a3a"},
+  {yr:"2015–17",org:"UNIVERSITY OF\nAUCKLAND ·etc",role:"Business Analyst / Consultant",blurb:"Finding range. The University's first Scrum squad redeveloping its website and the scholarship system — plus contracts at Victoria University and Davanti.",building:"university",col:"#1d3461"},
+  {yr:"2012–14",org:"HEALTH\nALLIANCE",role:"Business Analyst",blurb:"Early days. Oracle inventory management to hospital theatres and wards across two DHBs — 'business analyst extraordinaire'.",building:"hospital",col:"#2bb3a3"},
+  {yr:"2011–12",org:"NORTH\nPOWER",role:"Process Analyst",blurb:"The first rung. Mapping operational processes in the utilities sector — the very first analyst role, where the story begins.",building:"powerplant",col:"#e0a020"},
 ];
 
 const cv=document.getElementById('game'),ctx=cv.getContext('2d');
@@ -172,90 +172,168 @@ function hideCard(){card.classList.remove('show');activeJob=-1;gprompt.style.opa
 card.addEventListener('click',()=>{hideCard();cardLock=true;});
 
 // drawing helpers
-function px2(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function shade(hex,a){let n=parseInt(hex.slice(1),16);let r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return`rgb(${r},${g},${b})`;}
-function box3d(bx,by,bw,bh,c){px2(bx,by,bw,bh,c);px2(bx,by,bw,5,shade(c,28));px2(bx,by,5,bh,shade(c,18));px2(bx+bw-5,by,5,bh,shade(c,-28));}
-function windows(bx,by,bw,bh,c,gx,gy){for(let wy=by+12;wy<by+bh-16;wy+=(gy||26))for(let wx=bx+12;wx<bx+bw-18;wx+=(gx||26)){px2(wx,wy,13,15,'#0d0d18');px2(wx+2,wy+2,9,5,shade(c,75));}}
-function door(sx,gy,c){px2(sx-12,gy-26,24,26,shade(c,-40));px2(sx-9,gy-22,18,22,'#0d0d18');}
-
-// compact building drawer (centered at sx, base at by+bh => groundline)
-function drawBuilding(j,cx,baseY){
-  const c=j.col,dk=shade(c,-34),lt=shade(c,30),t=j.building,sx=cx;
-  function B(bw,bh){const bx=sx-bw/2,by=baseY-bh;box3d(bx,by,bw,bh,c);return [bx,by,bw,bh];}
-  if(t==='powerplant'){const[bx,by,bw,bh]=B(120,70);windows(bx,by,bw,bh,c,30,26);for(const ox of[-36,36]){px2(sx+ox-13,by-44,26,44,shade(c,-10));px2(sx+ox-15,by-48,30,7,dk);}ctx.fillStyle='#ffe14d';ctx.beginPath();ctx.moveTo(sx+3,by-58);ctx.lineTo(sx-6,by-38);ctx.lineTo(sx,by-38);ctx.lineTo(sx-4,by-22);ctx.lineTo(sx+9,by-44);ctx.lineTo(sx+1,by-44);ctx.closePath();ctx.fill();door(sx,baseY,c);}
-  else if(t==='hospital'){const[bx,by,bw,bh]=B(118,116);windows(bx,by,bw,bh,'#9aa',28,26);px2(bx,by,bw,8,'#e8e8f0');px2(sx-4,by-30,8,24,'#d23');px2(sx-12,by-22,24,8,'#d23');px2(sx-34,baseY-24,68,7,shade(c,-20));door(sx,baseY,'#bbb');}
-  else if(t==='university'){const[bx,by,bw,bh]=B(116,104);for(let ry=by+8;ry<by+bh;ry+=12)px2(bx,ry,bw,2,shade(c,-18));windows(bx,by,bw,bh,'#caa',26,26);ctx.fillStyle=shade(c,-10);ctx.beginPath();ctx.arc(sx,by-1,20,Math.PI,2*Math.PI);ctx.fill();px2(sx-2,by-34,4,14,'#caa');px2(sx-7,by-16,14,14,'#f4ecd0');px2(sx-1,by-12,2,7,'#333');px2(sx-34,baseY-7,68,7,shade(c,-24));door(sx,baseY,c);}
-  else if(t==='govhall'){const[bx,by,bw,bh]=B(120,112);windows(bx,by,bw,bh,c,26,26);px2(bx-3,by,bw+6,9,dk);px2(sx+44,by-38,3,38,'#888');px2(sx+47,by-38,20,12,'#3a6ea5');px2(sx-28,baseY-34,56,7,dk);for(const ox of[-22,-6,8,22])px2(sx+ox,baseY-34,7,34,shade(c,-12));door(sx,baseY,c);}
-  else if(t==='transport'){const[bx,by,bw,bh]=B(112,66);windows(bx,by,bw,bh,c,28,24);px2(bx-14,baseY-9,bw+28,9,'#2a2a2e');for(let i=bx-10;i<bx+bw+18;i+=22)px2(i,baseY-6,11,3,'#ffd24d');px2(sx-46,by-36,92,7,'#555');px2(sx-46,by-36,7,36,'#555');px2(sx+40,by-36,7,36,'#555');px2(sx-8,by-46,16,10,'#222');px2(sx+8,by-43,5,4,'#9ad');ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx-34,by-24,10,0,7);ctx.fill();ctx.strokeStyle='#c22';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(sx-34,by-24,10,0,7);ctx.stroke();ctx.fillStyle='#222';ctx.font='6px "Press Start 2P"';ctx.textAlign='center';ctx.fillText('50',sx-34,by-21);door(sx,baseY,c);}
-  else if(t==='police'){const[bx,by,bw,bh]=B(120,116);windows(bx,by,bw,bh,c,26,26);px2(bx,by,bw,8,dk);for(const ox of[-26,26]){px2(sx+ox-4,baseY-38,9,11,'#3a6ee8');px2(sx+ox-2,baseY-40,5,4,'#9ac4ff');}for(let i=0;i<bw/12;i++)px2(bx+i*12,by+bh-20,12,7,(i%2)?'#fff':'#1a2a5a');ctx.fillStyle='#ffd24d';ctx.beginPath();ctx.moveTo(sx,by-36);ctx.lineTo(sx-10,by-29);ctx.lineTo(sx-10,by-16);ctx.lineTo(sx,by-10);ctx.lineTo(sx+10,by-16);ctx.lineTo(sx+10,by-29);ctx.closePath();ctx.fill();door(sx,baseY,'#16264a');}
-  else if(t==='embassy'){const[bx,by,bw,bh]=B(116,84);windows(bx,by,bw,bh,c,26,24);px2(bx,by,bw,7,shade(c,30));const gx=sx,gy=by-34,gr=32;ctx.fillStyle='#3aa0d8';ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.fill();ctx.fillStyle='#2a90c8';ctx.beginPath();ctx.arc(gx,gy,gr,0.3,Math.PI-0.3);ctx.fill();ctx.fillStyle='#5fc26a';px2(gx-21,gy-14,13,9,'#5fc26a');px2(gx-11,gy-6,8,14,'#5fc26a');px2(gx+3,gy-17,14,8,'#5fc26a');px2(gx+8,gy-9,11,12,'#5fc26a');px2(gx-5,gy+9,9,6,'#5fc26a');ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(gx,gy,gr,0,7);ctx.moveTo(gx-gr,gy);ctx.lineTo(gx+gr,gy);ctx.ellipse(gx,gy,gr*0.5,gr,0,0,7);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(gx-11,gy-11,5,0,7);ctx.fill();door(sx,baseY,c);}
-  else if(t==='courthouse'){const[bx,by,bw,bh]=B(120,98);ctx.fillStyle=shade(c,-12);ctx.beginPath();ctx.moveTo(bx-5,by);ctx.lineTo(sx,by-32);ctx.lineTo(bx+bw+5,by);ctx.closePath();ctx.fill();for(let i=0;i<5;i++){const colx=bx+14+i*24;px2(colx,by+5,11,bh-24,shade(c,22));px2(colx,by+5,11,3,shade(c,-10));px2(colx,by+bh-22,11,3,shade(c,-10));}px2(bx-5,by+bh-19,bw+10,7,shade(c,-20));px2(sx-1,by-27,2,13,'#3a2d12');px2(sx-10,by-24,20,2,'#3a2d12');px2(sx-10,by-22,3,4,'#ffd24d');px2(sx+7,by-22,3,4,'#ffd24d');door(sx,baseY,shade(c,-30));}
-  else if(t==='socialdev'){ // MSD — community hall with a heart/people emblem
-    const[bx,by,bw,bh]=B(120,108);windows(bx,by,bw,bh,c,26,26);px2(bx-3,by,bw+6,8,dk);
-    // gentle gabled roof
-    ctx.fillStyle=dk;ctx.beginPath();ctx.moveTo(bx-4,by);ctx.lineTo(sx,by-22);ctx.lineTo(bx+bw+4,by);ctx.closePath();ctx.fill();
-    // heart emblem
-    ctx.fillStyle='#e86a8a';ctx.beginPath();ctx.arc(sx-5,by-12,5,0,7);ctx.arc(sx+5,by-12,5,0,7);ctx.moveTo(sx-9,by-10);ctx.lineTo(sx,by+2);ctx.lineTo(sx+9,by-10);ctx.fill();
-    px2(sx-30,baseY-8,60,8,shade(c,-22));door(sx,baseY,c);
-  }
-  else if(t==='camera'){ // NZTA Safety Cameras — pole-mounted speed camera + flash
-    const[bx,by,bw,bh]=B(104,72);windows(bx,by,bw,bh,c,26,24);px2(bx,by,bw,7,shade(c,30));
-    // tall camera pole beside the building
-    const polx=sx+58;px2(polx,by-70,6,bh+70,'#555');
-    // camera head
-    px2(polx-26,by-78,30,18,'#222');px2(polx-26,by-78,30,4,'#444');
-    px2(polx-22,by-74,8,8,'#9ad');           // lens
-    px2(polx-12,by-72,4,4,'#f55');           // record dot
-    // flash burst
-    ctx.fillStyle='rgba(255,255,210,.85)';ctx.beginPath();ctx.moveTo(polx-30,by-70);ctx.lineTo(polx-46,by-78);ctx.lineTo(polx-44,by-66);ctx.lineTo(polx-58,by-66);ctx.lineTo(polx-44,by-58);ctx.lineTo(polx-48,by-46);ctx.lineTo(polx-30,by-58);ctx.closePath();ctx.fill();
-    // road dashes in front
-    px2(bx-12,baseY-9,bw+24,9,'#2a2a2e');for(let i=bx-8;i<bx+bw+16;i+=20)px2(i,baseY-6,10,3,'#ffd24d');
-    door(sx,baseY,c);
-  }
-  else if(t==='secure'){ // MFAT Security — fortified building, shield + padlock
-    const[bx,by,bw,bh]=B(112,104);windows(bx,by,bw,bh,c,26,26);px2(bx,by,bw,8,dk);
-    // antenna/dish on roof (secure comms)
-    px2(sx+34,by-22,3,22,'#888');ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(sx+35,by-24,7,Math.PI,2*Math.PI);ctx.fill();
-    // shield emblem with padlock
-    ctx.fillStyle='#cdd6e0';ctx.beginPath();ctx.moveTo(sx,by-40);ctx.lineTo(sx-14,by-33);ctx.lineTo(sx-14,by-16);ctx.lineTo(sx,by-7);ctx.lineTo(sx+14,by-16);ctx.lineTo(sx+14,by-33);ctx.closePath();ctx.fill();
-    ctx.fillStyle=shade(c,-20);ctx.beginPath();ctx.moveTo(sx,by-36);ctx.lineTo(sx-10,by-31);ctx.lineTo(sx-10,by-18);ctx.lineTo(sx,by-11);ctx.lineTo(sx+10,by-18);ctx.lineTo(sx+10,by-31);ctx.closePath();ctx.fill();
-    // padlock on shield
-    px2(sx-4,by-26,8,7,'#ffd24d');ctx.strokeStyle='#ffd24d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx,by-27,3,Math.PI,2*Math.PI);ctx.stroke();
-    door(sx,baseY,dk);
-  }
-  else { // tribunal — Fair Work Commission: modern glass office + a clear scales roof sign
-    const[bx,by,bw,bh]=B(104,150);
-    // glass curtain wall
-    for(let wx=bx+8;wx<bx+bw-13;wx+=20){px2(wx,by+12,13,bh-22,'#0d1822');for(let wy=by+16;wy<by+bh-14;wy+=15)px2(wx+2,wy,9,6,shade(c,70));}
-    px2(bx,by,bw,9,shade(c,40));px2(bx,by,5,bh,shade(c,18));px2(bx+bw-5,by,5,bh,shade(c,-28));
-    // a dark sign panel on the roof holding a clean ⚖ icon (readable, not a blob)
-    const pw=54,ph=30,pxx=sx-pw/2,pyy=by-ph-6;
-    px2(pxx,pyy,pw,ph,'#13110f');px2(pxx,pyy,pw,3,'#2a2620');
-    // scales icon, drawn with clear thick strokes on the dark panel
-    const ey=pyy+ph/2;
-    px2(sx-1,ey-9,2,18,'#F0A830');                 // vertical post
-    px2(sx-15,ey-9,30,2,'#F0A830');                // top beam
-    px2(sx-15,ey-9,2,5,'#F0A830');px2(sx+13,ey-9,2,5,'#F0A830'); // hangers
-    px2(sx-20,ey-4,11,2,'#F0A830');                // left pan
-    px2(sx+9,ey-4,11,2,'#F0A830');                 // right pan
-    px2(sx-6,ey+9,12,2,'#F0A830');                 // base foot
-    // entrance canopy
-    px2(sx-26,baseY-34,52,6,shade(c,-20));px2(sx-22,baseY-34,4,34,shade(c,-10));px2(sx+18,baseY-34,4,34,shade(c,-10));
-    door(sx,baseY,shade(c,-20));
+// rounded rect helper
+function rrect(x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
+// soft contact shadow under an object
+function softShadow(cx,by,w){const g=ctx.createRadialGradient(cx,by,2,cx,by,w);g.addColorStop(0,'rgba(20,30,20,.28)');g.addColorStop(1,'rgba(20,30,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,by,w,w*0.34,0,0,7);ctx.fill();}
+// ISOMETRIC BOX: a cuboid drawn with a top face + left + right faces, gentle lighting.
+// anchored so its FRONT-BOTTOM edge sits at (cx, baseY). dx/dy = isometric unit.
+function isoBox(cx,baseY,w,d,h,c){
+  const ix=0.86, iy=0.5;                       // iso projection ratios
+  const lx=w/2, ly=d/2;
+  // 8 corners projected
+  const P=(X,Y,Z)=>[cx+(X)*ix, baseY+(Y)*iy - Z];
+  // base rectangle corners (front-bottom center anchor)
+  const fbl=P(-lx, ly,0), fbr=P(lx, ly,0), bbl=P(-lx,-ly,0), bbr=P(lx,-ly,0);
+  const ftl=P(-lx, ly,h), ftr=P(lx, ly,h), btl=P(-lx,-ly,h), btr=P(lx,-ly,h);
+  // right face (lit-ish)
+  ctx.fillStyle=shade(c,-26);ctx.beginPath();ctx.moveTo(...fbr);ctx.lineTo(...bbr);ctx.lineTo(...btr);ctx.lineTo(...ftr);ctx.closePath();ctx.fill();
+  // left/front face (most lit)
+  ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(...fbl);ctx.lineTo(...fbr);ctx.lineTo(...ftr);ctx.lineTo(...ftl);ctx.closePath();ctx.fill();
+  // top face (lightest)
+  ctx.fillStyle=shade(c,30);ctx.beginPath();ctx.moveTo(...ftl);ctx.lineTo(...ftr);ctx.lineTo(...btr);ctx.lineTo(...btl);ctx.closePath();ctx.fill();
+  return {P,lx,ly,h,fbl,fbr,ftl,ftr,btr,btl};
+}
+// rows of windows on the FRONT face of an isoBox
+function isoWindows(box,c,cols,rows){
+  const {P,lx,ly,h}=box, ix=0.86, iy=0.5;
+  for(let r=0;r<rows;r++)for(let cwin=0;cwin<cols;cwin++){
+    const fx=-lx+ (lx*2)*( (cwin+0.7)/(cols+0.4) );
+    const z = h*0.12 + (h*0.78)*(r/(rows));
+    const wx=cx=>cx; // noop
+    const x=P(fx,ly,z)[0], y=P(fx,ly,z)[1];
+    ctx.fillStyle='rgba(180,220,255,.85)';ctx.fillRect(x-4,y-7,8,9);
+    ctx.fillStyle='rgba(120,160,200,.5)';ctx.fillRect(x-4,y-1,8,3);
   }
 }
 
-// vertical character (walking down/up)
+// soft isometric building. Anchored front-bottom at (cx, baseY).
+function drawBuilding(j,cx,baseY){
+  const c=j.col,dk=shade(c,-34),lt=shade(c,30),t=j.building;
+  // contact shadow
+  softShadow(cx,baseY+4,52);
+
+  if(t==='powerplant'){
+    const box=isoBox(cx,baseY,86,60,52,c);isoWindows(box,c,3,2);
+    for(const ox of[-30,30]){isoBox(cx+ox,baseY-6,26,22,46,shade(c,8));}
+    // lightning emblem (rounded)
+    ctx.fillStyle='#ffe14d';ctx.beginPath();ctx.moveTo(cx+4,baseY-92);ctx.lineTo(cx-8,baseY-66);ctx.lineTo(cx-1,baseY-66);ctx.lineTo(cx-6,baseY-46);ctx.lineTo(cx+11,baseY-72);ctx.lineTo(cx+2,baseY-72);ctx.closePath();ctx.fill();
+  }
+  else if(t==='hospital'){
+    const box=isoBox(cx,baseY,92,64,96,c);isoWindows(box,'#cfe',3,4);
+    // white band + red cross sign, rounded
+    rrect(cx-13,baseY-92,26,26,5,'#ffffff');ctx.fillStyle='#e23b4e';ctx.fillRect(cx-3,baseY-86,6,14);ctx.fillRect(cx-7,baseY-82,14,6);
+  }
+  else if(t==='university'){
+    const box=isoBox(cx,baseY,90,62,84,c);isoWindows(box,'#caa',3,3);
+    // dome
+    ctx.fillStyle=shade(c,18);ctx.beginPath();ctx.ellipse(cx,baseY-86,22,14,0,Math.PI,2*Math.PI);ctx.fill();
+    ctx.fillStyle=lt;ctx.fillRect(cx-2,baseY-104,4,16);
+    // clock
+    ctx.fillStyle='#f4ecd0';ctx.beginPath();ctx.arc(cx,baseY-78,7,0,7);ctx.fill();ctx.strokeStyle='#333';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx,baseY-78);ctx.lineTo(cx,baseY-82);ctx.moveTo(cx,baseY-78);ctx.lineTo(cx+3,baseY-78);ctx.stroke();
+  }
+  else if(t==='govhall'){
+    const box=isoBox(cx,baseY,92,64,88,c);isoWindows(box,c,3,3);
+    // flag
+    ctx.fillStyle='#888';ctx.fillRect(cx+40,baseY-130,3,46);rrect(cx+43,baseY-130,22,13,2,'#3a6ea5');
+  }
+  else if(t==='transport'){
+    const box=isoBox(cx,baseY,82,58,52,c);isoWindows(box,c,3,2);
+    // gantry
+    ctx.strokeStyle='#666';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx-44,baseY-78);ctx.lineTo(cx+44,baseY-78);ctx.moveTo(cx-44,baseY-78);ctx.lineTo(cx-44,baseY-40);ctx.moveTo(cx+44,baseY-78);ctx.lineTo(cx+44,baseY-40);ctx.stroke();
+    rrect(cx-9,baseY-86,18,9,2,'#222');ctx.fillStyle='#9ad';ctx.fillRect(cx+4,baseY-84,4,4);
+    // speed sign
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(cx-34,baseY-58,11,0,7);ctx.fill();ctx.strokeStyle='#d33';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx-34,baseY-58,11,0,7);ctx.stroke();ctx.fillStyle='#222';ctx.font='bold 10px Space Grotesk';ctx.textAlign='center';ctx.fillText('50',cx-34,baseY-54);
+  }
+  else if(t==='police'){
+    const box=isoBox(cx,baseY,92,64,94,c);isoWindows(box,c,3,3);
+    // blue lamp
+    ctx.fillStyle='#3a6ee8';ctx.beginPath();ctx.arc(cx,baseY-104,7,0,7);ctx.fill();ctx.fillStyle='#9ac4ff';ctx.beginPath();ctx.arc(cx-2,baseY-106,3,0,7);ctx.fill();
+    // badge/shield
+    ctx.fillStyle='#ffd24d';ctx.beginPath();ctx.moveTo(cx,baseY-92);ctx.lineTo(cx-11,baseY-84);ctx.lineTo(cx-11,baseY-70);ctx.lineTo(cx,baseY-62);ctx.lineTo(cx+11,baseY-70);ctx.lineTo(cx+11,baseY-84);ctx.closePath();ctx.fill();
+  }
+  else if(t==='embassy'){
+    const box=isoBox(cx,baseY,86,60,66,c);isoWindows(box,c,3,2);
+    // big globe
+    const gy=baseY-96,gr=26;
+    ctx.fillStyle='#3aa0d8';ctx.beginPath();ctx.arc(cx,gy,gr,0,7);ctx.fill();
+    ctx.fillStyle='#2a90c8';ctx.beginPath();ctx.arc(cx,gy,gr,0.3,Math.PI-0.3);ctx.fill();
+    ctx.fillStyle='#5fc26a';ctx.beginPath();ctx.arc(cx-9,gy-6,7,0,7);ctx.arc(cx+8,gy+2,6,0,7);ctx.arc(cx+4,gy-10,5,0,7);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,gy,gr,0,7);ctx.moveTo(cx-gr,gy);ctx.lineTo(cx+gr,gy);ctx.ellipse(cx,gy,gr*0.5,gr,0,0,7);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(cx-9,gy-9,4,0,7);ctx.fill();
+  }
+  else if(t==='courthouse'){
+    const box=isoBox(cx,baseY,96,62,72,c);
+    // pediment
+    ctx.fillStyle=lt;ctx.beginPath();ctx.moveTo(cx-46,baseY-72);ctx.lineTo(cx,baseY-100);ctx.lineTo(cx+46,baseY-72);ctx.closePath();ctx.fill();
+    // columns on the front face
+    for(let i=0;i<5;i++){const colx=cx-38+i*19;ctx.fillStyle=shade(c,22);ctx.fillRect(colx,baseY-66,9,52);ctx.fillStyle=shade(c,-12);ctx.fillRect(colx,baseY-66,9,4);}
+    // scales emblem in pediment
+    ctx.strokeStyle='#3a2d12';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,baseY-92);ctx.lineTo(cx,baseY-80);ctx.moveTo(cx-9,baseY-88);ctx.lineTo(cx+9,baseY-88);ctx.stroke();ctx.fillStyle='#ffd24d';ctx.fillRect(cx-11,baseY-86,4,3);ctx.fillRect(cx+7,baseY-86,4,3);
+  }
+  else if(t==='socialdev'){
+    const box=isoBox(cx,baseY,92,64,84,c);isoWindows(box,c,3,3);
+    // heart emblem
+    ctx.fillStyle='#e86a8a';ctx.beginPath();ctx.arc(cx-5,baseY-92,5,0,7);ctx.arc(cx+5,baseY-92,5,0,7);ctx.moveTo(cx-9,baseY-90);ctx.lineTo(cx,baseY-78);ctx.lineTo(cx+9,baseY-90);ctx.fill();
+  }
+  else if(t==='camera'){
+    const box=isoBox(cx,baseY,80,56,54,c);isoWindows(box,c,3,2);
+    // camera pole
+    const polx=cx+44;ctx.fillStyle='#666';ctx.fillRect(polx,baseY-96,5,96);
+    rrect(polx-26,baseY-104,28,16,3,'#2a2a2e');ctx.fillStyle='#9ad';ctx.beginPath();ctx.arc(polx-18,baseY-96,4,0,7);ctx.fill();ctx.fillStyle='#f55';ctx.fillRect(polx-7,baseY-100,3,3);
+    // flash
+    ctx.fillStyle='rgba(255,255,210,.8)';ctx.beginPath();ctx.moveTo(polx-30,baseY-96);ctx.lineTo(polx-46,baseY-104);ctx.lineTo(polx-42,baseY-92);ctx.lineTo(polx-54,baseY-90);ctx.lineTo(polx-40,baseY-84);ctx.closePath();ctx.fill();
+  }
+  else if(t==='secure'){
+    const box=isoBox(cx,baseY,88,60,84,c);isoWindows(box,c,3,3);
+    // comms dish
+    ctx.fillStyle='#888';ctx.fillRect(cx+32,baseY-104,3,20);ctx.fillStyle='#bbb';ctx.beginPath();ctx.ellipse(cx+33,baseY-106,8,5,0.5,0,7);ctx.fill();
+    // shield + padlock
+    ctx.fillStyle='#cdd6e0';ctx.beginPath();ctx.moveTo(cx,baseY-104);ctx.lineTo(cx-13,baseY-96);ctx.lineTo(cx-13,baseY-80);ctx.lineTo(cx,baseY-72);ctx.lineTo(cx+13,baseY-80);ctx.lineTo(cx+13,baseY-96);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#ffd24d';ctx.fillRect(cx-4,baseY-92,8,7);ctx.strokeStyle='#ffd24d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,baseY-93,3,Math.PI,2*Math.PI);ctx.stroke();
+  }
+  else { // tribunal — Fair Work: clean modern glass tower + elevated scales sign
+    const H=104, topY=baseY-H;
+    const box=isoBox(cx,baseY,82,58,H,c);
+    // neat vertical glass mullions on the front face (evenly spaced, fitted to the box)
+    ctx.fillStyle='rgba(255,255,255,.22)';
+    for(let s=0;s<4;s++){const x=cx-30+s*17;ctx.fillRect(x,topY+10,6,H-20);}
+    // soft horizontal floor lines
+    ctx.fillStyle='rgba(20,40,70,.18)';
+    for(let fy=topY+22; fy<baseY-6; fy+=20){ctx.fillRect(cx-34,fy,68,2);}
+    // a thin parapet cap (lighter, not a black slab)
+    rrect(cx-36,topY-4,72,7,3,shade(c,34));
+    // slim post holding a small scales emblem above the roof
+    ctx.fillStyle='#8a93a6';ctx.fillRect(cx-1.5,topY-22,3,20);
+    const ey=topY-26;ctx.strokeStyle='#F0A830';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.fillStyle='#F0A830';
+    ctx.beginPath();ctx.moveTo(cx,ey-7);ctx.lineTo(cx,ey+7);ctx.moveTo(cx-12,ey-5);ctx.lineTo(cx+12,ey-5);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-16,ey-1);ctx.lineTo(cx-8,ey-1);ctx.moveTo(cx+8,ey-1);ctx.lineTo(cx+16,ey-1);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx-5,ey+7);ctx.lineTo(cx+5,ey+7);ctx.stroke();
+  }
+}
+
+// soft, rounded character viewed from front, walking down
 function drawHero(cx,cy,step){
-  const skin='#d9a066',shirt='#3a7d72',pants='#33304a',hair='#2a1d12',bag='#8a5a2a';
-  const x=cx-11,y=cy-24;
-  px2(x+4,y+30,6,13+(step?-2:0),pants);px2(x+12,y+30,6,13+(step?0:-2),pants);
-  px2(x+3,y+42-(step?2:0),8,4,'#222');px2(x+12,y+42-(step?0:2),8,4,'#222');
-  px2(x+3,y+12,16,20,shirt);px2(x+3,y+12,3,20,shade(shirt,25));
-  px2(x+16,y+16,7,10,bag);
-  px2(x,y+14,4,13,shirt);px2(x+19,y+14,4,13,shirt);
-  px2(x+5,y,13,13,skin);px2(x+4,y-2,15,6,hair);
-  px2(x+7,y+5,3,3,'#222');px2(x+13,y+5,3,3,'#222'); // facing camera (down)
+  const skin='#e0aa72',shirt='#3a7d8a',pants='#33384a',hair='#2a1d18',bag='#9a6a3a';
+  softShadow(cx,cy+20,18);
+  const sw=step?3:-3;
+  // legs (rounded)
+  rrect(cx-7,cy+6,6,16,3,pants);rrect(cx+1,cy+6,6,16,3,pants);
+  rrect(cx-8,cy+20,8,5,2,'#222');rrect(cx+1,cy+20,8,5,2,'#222');
+  // torso (rounded)
+  rrect(cx-9,cy-10,18,20,7,shirt);
+  // shoulder highlight
+  ctx.fillStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.roundRect(cx-9,cy-10,18,6,5);ctx.fill();
+  // satchel strap + bag
+  rrect(cx+6,cy-4,7,10,2,bag);
+  // arms swinging slightly
+  rrect(cx-12,cy-8+sw,5,14,3,shirt);rrect(cx+7,cy-8-sw,5,14,3,shirt);
+  // head (round)
+  ctx.fillStyle=skin;ctx.beginPath();ctx.arc(cx,cy-18,9,0,7);ctx.fill();
+  ctx.fillStyle=hair;ctx.beginPath();ctx.arc(cx,cy-21,9,Math.PI,2*Math.PI);ctx.fill();ctx.fillRect(cx-9,cy-21,18,3);
+  // eyes
+  ctx.fillStyle='#222';ctx.beginPath();ctx.arc(cx-3,cy-17,1.4,0,7);ctx.arc(cx+3,cy-17,1.4,0,7);ctx.fill();
 }
 
 let last=0;
@@ -270,36 +348,35 @@ function loop(ts){
   const camY=py-H*0.42;                       // camera follows player vertically
   const prog=(py-120)/(WORLD_LEN-200);        // 0 present(top) .. 1 past(bottom)
 
-  // bright sky
-  const grd=ctx.createLinearGradient(0,0,0,H);grd.addColorStop(0,'#6fc0ee');grd.addColorStop(0.7,'#bfe6f5');grd.addColorStop(1,'#e8f4d8');
-  ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
-  // clouds (parallax)
-  for(let i=0;i<6;i++){const cy=((i*220 - camY*0.2)%(H+200)+ (H+200))%(H+200)-100;const cx=(i*97)%W;px2(cx,cy,30,9,'rgba(255,255,255,.85)');px2(cx+10,cy-7,28,9,'rgba(255,255,255,.85)');}
-  // grass verges + vertical road down the middle
-  const pathW=86, pathX=W/2-pathW/2;
-  px2(0,0,pathX,H,'#6fc060');px2(pathX+pathW,0,W-(pathX+pathW),H,'#6fc060');
-  px2(pathX,0,pathW,H,'#9a8f7c');px2(pathX,0,6,H,'#b0a690');px2(pathX+pathW-6,0,6,H,'#857c6a');
-  for(let yy=((-camY)%48+48)%48; yy<H; yy+=48)px2(W/2-4,yy,8,22,'#ffd24d');
+  // soft grass field (clean top-down)
+  ctx.clearRect(0,0,W,H);
+  // grass verges (leave sky only as a thin strip is unnecessary — full grass field looks right top-down)
+  ctx.fillStyle='#74c46a';ctx.fillRect(0,0,W,H);
+  // subtle grass texture tufts
+  ctx.fillStyle='rgba(95,178,92,.6)';
+  for(let gy=((-camY*0.5)%40+40)%40; gy<H; gy+=40)for(let gx=18; gx<W; gx+=66){if(Math.abs(gx-W/2)>70){ctx.beginPath();ctx.ellipse(gx,gy,5,2,0,0,7);ctx.fill();}}
+  // road as a soft rounded ribbon down the middle
+  const roadW=92, rx=W/2;
+  ctx.fillStyle='#9aa0ac';ctx.beginPath();ctx.roundRect(rx-roadW/2,-20,roadW,H+40,14);ctx.fill();
+  ctx.fillStyle='#aeb4c0';ctx.fillRect(rx-roadW/2,-20,5,H+40);
+  ctx.fillStyle='#878d99';ctx.fillRect(rx+roadW/2-5,-20,5,H+40);
+  // centre dashes (rounded), amber
+  for(let yy=((-camY)%52+52)%52; yy<H; yy+=52){ctx.fillStyle='#F0A830';ctx.beginPath();ctx.roundRect(rx-3,yy,6,22,3);ctx.fill();}
 
-  // buildings on alternating sides along the path
+  // buildings, alternating sides
   JOBS.forEach((j,i)=>{
     const wy=jobY(i)-camY;
-    if(wy>-160 && wy<H+160){
-      const side=(i%2)? -1: 1;                 // right/left of path
-      // center each building within its verge (space between road edge and rail edge)
-      const vergeMid=(pathW/2 + W/2)/2;
-      const cx=W/2 + side*vergeMid;
-      // connector from path to plot (draw first, behind building)
-      px2(W/2,wy+24,side*(pathW/2),6,'#857c6a');
-      // draw building scaled to fit the verge
-      ctx.save();
-      ctx.translate(cx,wy+30);ctx.scale(0.82,0.82);ctx.translate(-cx,-(wy+30));
-      drawBuilding(j,cx,wy+30);
-      ctx.restore();
-      // year marker post on the road (auto-width to fit label)
-      ctx.font='9px "Press Start 2P"';ctx.textAlign='center';
-      const lbl=j.yr, lw=ctx.measureText(lbl).width, pw2=Math.max(44,lw+14);
-      px2(W/2-pw2/2,wy-2,pw2,18,'#0a1120');ctx.fillStyle='#F0A830';ctx.fillText(lbl,W/2,wy+11);
+    if(wy>-200 && wy<H+200){
+      const side=(i%2)? -1: 1;
+      const cx=W/2 + side*(roadW/2 + 70);
+      // soft connector path from road to plot
+      ctx.strokeStyle='#9aa0ac';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(W/2,wy+18);ctx.lineTo(cx,wy+22);ctx.stroke();
+      drawBuilding(j,cx,wy+22);
+      // year marker — rounded pill on the road
+      ctx.font='bold 12px Space Grotesk';ctx.textAlign='center';
+      const lbl=j.yr, lw=ctx.measureText(lbl).width, pw2=Math.max(40,lw+18);
+      ctx.fillStyle='#0a1120';ctx.beginPath();ctx.roundRect(W/2-pw2/2,wy-4,pw2,20,10);ctx.fill();
+      ctx.fillStyle='#F0A830';ctx.fillText(lbl,W/2,wy+10);
     }
   });
 
