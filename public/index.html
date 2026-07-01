@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -50,6 +50,22 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 .chat-head .os .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);margin-right:7px}
 .beta{margin-left:9px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:2px 6px;vertical-align:middle;opacity:.9}
 .chat-head .hr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c8498;letter-spacing:1px;text-transform:uppercase}
+.head-actions{display:flex;align-items:center;gap:10px}
+.hbtn{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;letter-spacing:.5px;border-radius:9px;padding:8px 13px;cursor:pointer;text-decoration:none;transition:.15s;border:1px solid transparent}
+.hbtn.primary{background:var(--accent);color:#0E1726;box-shadow:0 2px 10px rgba(240,168,48,.25)}
+.hbtn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(240,168,48,.35)}
+.hbtn.ghost{background:transparent;color:#a9b0c2;border-color:var(--border)}
+.hbtn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.hbtn svg{flex:0 0 auto}
+.share-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--accent);color:#EDE8DF;font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 16px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
+.share-toast.show{opacity:1}
+#shareFallback{position:fixed;inset:0;background:rgba(6,10,18,.7);display:none;align-items:center;justify-content:center;z-index:200}
+#shareFallback.show{display:flex}
+#shareFallback .sf-box{background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:22px;width:min(420px,90vw);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#shareFallback .sf-t{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--accent);margin-bottom:12px}
+#shareFallback .sf-in{width:100%;background:#0a1120;border:1px solid var(--border);border-radius:8px;color:#EDE8DF;font-family:'JetBrains Mono',monospace;font-size:13px;padding:11px 12px;outline:none}
+#shareFallback .sf-x{margin-top:14px;float:right;background:var(--accent);color:#0E1726;border:none;border-radius:8px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;padding:9px 16px;cursor:pointer}
+@media(max-width:560px){.hbtn .lbl{display:none}.hbtn{padding:9px 11px}}
 .intro-card{max-width:760px;margin:0;width:100%;padding:36px 30px 6px}
 .intro-card h1{font-family:'Space Grotesk';font-weight:700;font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.05;color:#EDE8DF}
 .intro-card h1 .a{color:var(--accent)}
@@ -108,7 +124,16 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
   <section id="chat">
     <div class="chat-head">
       <div class="os"><span class="dot"></span>RAVI-OS v1.0<span class="beta">BETA</span></div>
-      <div class="hr">an interview with the work of ravi gokal</div>
+      <div class="head-actions">
+        <button class="hbtn ghost" id="shareBtn" title="Share">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+          <span class="lbl">Share</span>
+        </button>
+        <a class="hbtn primary" id="contactBtn" href="https://www.linkedin.com/in/ravigokal" target="_blank" rel="noopener" title="Contact Ravi on LinkedIn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.02 8h4.96v14H.02V8zM8.02 8h4.75v1.92h.07c.66-1.25 2.28-2.57 4.7-2.57 5.03 0 5.96 3.31 5.96 7.61V22h-4.96v-6.13c0-1.46-.03-3.34-2.03-3.34-2.04 0-2.35 1.59-2.35 3.23V22H8.02V8z"/></svg>
+          <span class="lbl">Contact Ravi</span>
+        </a>
+      </div>
     </div>
     <div class="intro-card">
       <h1>Don't read my CV. <span class="a">Interrogate it.</span></h1>
@@ -392,6 +417,42 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 resize();requestAnimationFrame(loop);setTimeout(resize,60);setTimeout(resize,300);
+
+// ===== share =====
+const shareBtn=document.getElementById('shareBtn');
+shareBtn.addEventListener('click',async()=>{
+  // canonical public URL — never the iframe/preview location (which can be about:srcdoc)
+  const SHARE_URL="https://ask-ravi.vercel.app";
+  const loc=location.href;
+  const url=(loc.startsWith('http')&&!loc.includes('srcdoc')) ? loc : SHARE_URL;
+  const title="Ask Ravi — an AI that knows Ravi Gokal's career", text="Don't read my CV. Interrogate it.";
+  // 1) native share sheet (mobile / supported browsers)
+  if(navigator.share){
+    try{ await navigator.share({title,text,url}); return; }
+    catch(e){ if(e && e.name==='AbortError') return; } // user cancelled — stop
+  }
+  // 2) async clipboard (secure contexts)
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    try{ await navigator.clipboard.writeText(url); toast("Link copied ✓"); return; }
+    catch(e){/* fall through */}
+  }
+  // 3) legacy execCommand copy (works on file:// and older browsers)
+  try{
+    const ta=document.createElement('textarea');ta.value=url;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();
+    const ok=document.execCommand('copy');document.body.removeChild(ta);
+    if(ok){ toast("Link copied ✓"); return; }
+  }catch(e){/* fall through */}
+  // 4) last resort: show the link so they can copy it manually
+  showShareFallback(url);
+});
+function toast(msg){let t=document.querySelector('.share-toast');if(!t){t=document.createElement('div');t.className='share-toast';document.body.appendChild(t);}t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1900);}
+function showShareFallback(url){
+  let m=document.getElementById('shareFallback');
+  if(!m){m=document.createElement('div');m.id='shareFallback';m.innerHTML='<div class="sf-box"><div class="sf-t">Copy this link</div><input class="sf-in" readonly value="'+url+'"/><button class="sf-x">Close</button></div>';document.body.appendChild(m);
+    m.querySelector('.sf-x').onclick=()=>m.classList.remove('show');
+    m.onclick=e=>{if(e.target===m)m.classList.remove('show');};}
+  const inp=m.querySelector('.sf-in');inp.value=url;m.classList.add('show');setTimeout(()=>{inp.focus();inp.select();},50);
+}
 
 // ===== chat =====
 const SUGGESTED=["Why should I hire Ravi?","Tell me about his security work","What's his biggest cost saving?","Has he led teams?","How does he use AI in his work?","What do people say about him?"];
