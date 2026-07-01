@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -425,10 +425,10 @@ shareBtn.addEventListener('click',async()=>{
   const SHARE_URL="https://ask-ravi.vercel.app";
   const loc=location.href;
   const url=(loc.startsWith('http')&&!loc.includes('srcdoc')) ? loc : SHARE_URL;
-  const title="Ask Ravi — an AI that knows Ravi Gokal's career", text="Don't read my CV. Interrogate it.";
+  const title="Ask Ravi — an AI that knows Ravi Gokal's career";
   // 1) native share sheet (mobile / supported browsers)
   if(navigator.share){
-    try{ await navigator.share({title,text,url}); return; }
+    try{ await navigator.share({title,url}); return; }
     catch(e){ if(e && e.name==='AbortError') return; } // user cancelled — stop
   }
   // 2) async clipboard (secure contexts)
