@@ -69,17 +69,28 @@ import { neon } from "@neondatabase/serverless";
 const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 
 // Fire-and-forget: never let logging failures affect the answer.
-function logQuestion({ sessionId, question, referrer, pagePath }) {
+function logQuestion({ sessionId, question, referrer, pagePath, persona }) {
   if (!sql || !question) return;
   try {
     sql`
-      INSERT INTO questions (session_id, question, referrer, page_path)
-      VALUES (${sessionId || null}, ${question}, ${referrer || null}, ${pagePath || null})
+      INSERT INTO questions (session_id, question, referrer, page_path, persona)
+      VALUES (${sessionId || null}, ${question}, ${referrer || null}, ${pagePath || null}, ${persona || null})
     `.catch((e) => console.error("[log] insert failed:", e));
   } catch (e) {
     console.error("[log] sync failed:", e);
   }
 }
+
+// Visitor-selected path from the front end. Whitelisted here so arbitrary
+// client strings can never reach the system prompt or the database.
+const PERSONA_NOTES = {
+  recruiter:
+    "The visitor has identified themselves as a RECRUITER. Lead with placement-relevant facts: seniority, contract vs permanent history, location and work rights (NZ citizen, Brisbane resident), notice/engagement style, and referee quality. Keep answers skimmable.",
+  manager:
+    "The visitor has identified themselves as a HIRING MANAGER. Lead with delivery evidence: outcomes, team leadership, stakeholder management, and how Ravi would operate inside their team. Name specific programmes as proof.",
+  curious:
+    "The visitor has identified themselves as JUST CURIOUS. Be a touch warmer and more storytelling in tone — favour the most interesting, concrete stories (the $1M saving, the IoT enforcement platform, the high-threat security work) while staying factual.",
+};
 
 // --- Simple in-memory rate limit: caps requests per IP per window. ---
 // Protects your API budget from one person hammering the endpoint.
@@ -114,7 +125,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, sessionId, referrer, pagePath } = req.body || {};
+    const { messages, sessionId, referrer, pagePath, persona } = req.body || {};
+    const personaKey = Object.prototype.hasOwnProperty.call(PERSONA_NOTES, persona) ? persona : null;
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "messages[] required" });
     }
@@ -126,7 +138,7 @@ export default async function handler(req, res) {
     }));
 
     const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
-    logQuestion({ sessionId, question: lastUser?.content, referrer, pagePath });
+    logQuestion({ sessionId, question: lastUser?.content, referrer, pagePath, persona: personaKey });
 
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -138,7 +150,9 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
-        system: CV_CONTEXT,
+        system: personaKey
+          ? CV_CONTEXT + "\n\n=== VISITOR CONTEXT ===\n" + PERSONA_NOTES[personaKey]
+          : CV_CONTEXT,
         messages: trimmed,
       }),
     });
