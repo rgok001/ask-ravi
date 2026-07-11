@@ -79,6 +79,20 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 #chips{display:flex;gap:8px;overflow-x:auto;padding:8px 30px;max-width:760px;width:100%;margin:0}
 .chip{white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#cdd3df;background:transparent;border:1px solid var(--border);border-radius:40px;padding:8px 15px;cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.jdc{border-color:var(--accent);color:var(--accent);font-weight:700}
+.chip.jdc:hover{background:rgba(240,168,48,.12)}
+#jdModal{position:fixed;inset:0;background:rgba(6,10,18,.7);display:none;align-items:center;justify-content:center;z-index:200}
+#jdModal.show{display:flex}
+#jdModal .jd-box{background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:22px;width:min(560px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+#jdModal .jd-t{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;color:var(--accent);margin-bottom:6px}
+#jdModal .jd-s{font-size:.88rem;color:#a9b0c2;line-height:1.45;margin-bottom:12px}
+#jdModal textarea{width:100%;height:220px;resize:vertical;background:#0a1120;border:1px solid var(--border);border-radius:8px;color:#EDE8DF;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.5;padding:11px 12px;outline:none}
+#jdModal textarea:focus{border-color:var(--accent)}
+#jdModal .jd-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+#jdModal .jd-c{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c8498}
+#jdModal .jd-go{background:var(--accent);color:#0E1726;border:none;border-radius:8px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;padding:10px 18px;cursor:pointer}
+#jdModal .jd-go:disabled{opacity:.4;cursor:default}
+#jdModal .jd-x{background:transparent;color:#7c8498;border:none;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;padding:10px 10px}
 .composer{display:flex;align-items:center;gap:12px;margin:0 30px 26px;padding:6px 6px 6px 18px;
   border:2px solid var(--border);border-radius:14px;background:var(--panel);max-width:760px;width:calc(100% - 60px);
   box-shadow:0 6px 24px rgba(0,0,0,.5)}
@@ -138,7 +152,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
     <div class="intro-card">
       <h1>Don't read my CV. <span class="a">Interrogate it.</span></h1>
       <p>Thanks for stopping by. Instead of scrolling through a CV, you can just ask. I've spent 13 years as a business analyst across government and beyond. Go ahead and ask me about any of it. <span class="walknote" style="color:#6a6a70">(Walk the timeline on the left while you're at it.)</span></p>
-      <p style="margin-top:8px;font-size:.82rem;color:#6a7285">Questions are logged anonymously (no names, no answers) so I can see what people ask.</p>
+      <p style="margin-top:8px;font-size:.82rem;color:#6a7285">Questions and pasted job descriptions are logged anonymously (no names, no answers) so I can see what people ask.</p>
     </div>
     <div id="chips"></div>
     <div id="thread"></div>
@@ -146,6 +160,17 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
       <span style="color:var(--accent);font-weight:700">›</span>
       <input id="input" placeholder="ask about ravi…" aria-label="Ask about Ravi" />
       <button class="send" id="send">ASK →</button>
+    </div>
+    <div id="jdModal">
+      <div class="jd-box">
+        <div class="jd-t">MATCH RAVI TO A ROLE</div>
+        <div class="jd-s">Paste a job description and you'll get an honest fit assessment: where he has direct evidence, where his experience is adjacent, and any real gaps.</div>
+        <textarea id="jdText" maxlength="8000" placeholder="Paste the job description here…" aria-label="Job description"></textarea>
+        <div class="jd-foot">
+          <span class="jd-c"><span id="jdCount">0</span> / 8000</span>
+          <span><button class="jd-x" id="jdCancel">Cancel</button><button class="jd-go" id="jdGo" disabled>ASSESS FIT</button></span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -482,7 +507,7 @@ const SUGGESTED=["Why should I hire Ravi?","Tell me about his security work","Wh
 // persona paths — each seeds different chips and a short client-side ack (no API cost)
 const PERSONAS={
   recruiter:{label:"I'm a recruiter",chips:["Give me the 60-second pitch","Where is he based and what are his work rights?","Contract or permanent: what's his history?","What do his references say?"],
-    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything, or start with one of the prompts above."},
+    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything, start with a prompt above, or paste a job description and I'll assess the fit honestly."},
   manager:{label:"I'm a hiring manager",chips:["What's his biggest delivery win?","How does he handle difficult stakeholders?","Has he led teams?","How does he use AI in his work?"],
     ack:"Good, the hiring manager view. He's led mixed vendor/in-house squads, owned a 200+ story backlog, and reported to steering committees. Tell me what your role needs and I'll map him to it, or pick a prompt above."},
   curious:{label:"Just curious",chips:["What's the most unusual project he's worked on?","Tell me the million-dollar saving story","What's the IoT roadside enforcement platform?","What do people say about him?"],
@@ -491,7 +516,9 @@ const PERSONAS={
 let persona=sessionStorage.getItem('ravi_persona')||null;
 const chips=document.getElementById('chips'),thread=document.getElementById('thread'),input=document.getElementById('input'),send=document.getElementById('send');
 let messages=[],loading=false,started=false;
-function setChips(list){chips.innerHTML='';list.forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;b.onclick=()=>ask(q);chips.appendChild(b);});}
+function setChips(list){chips.innerHTML='';
+  const j=document.createElement('button');j.className='chip jdc';j.textContent='📋 Match Ravi to a role';j.onclick=openJD;chips.appendChild(j);
+  list.forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;b.onclick=()=>ask(q);chips.appendChild(b);});}
 function baseChips(){return (persona&&PERSONAS[persona])?PERSONAS[persona].chips:SUGGESTED;}
 function renderGreeting(){
   const r=document.createElement('div');r.className='rowB';r.id='greet';
@@ -530,6 +557,27 @@ async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU
   catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government. Secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
   finally{loading=false;send.disabled=false;input.focus();}}
 send.onclick=()=>ask(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value);});
+
+// ===== JD fit assessment =====
+const jdModal=document.getElementById('jdModal'),jdTextEl=document.getElementById('jdText'),jdGo=document.getElementById('jdGo'),jdCount=document.getElementById('jdCount');
+function openJD(){jdModal.classList.add('show');setTimeout(()=>jdTextEl.focus(),50);}
+function closeJD(){jdModal.classList.remove('show');}
+document.getElementById('jdCancel').onclick=closeJD;
+jdModal.addEventListener('click',e=>{if(e.target===jdModal)closeJD();});
+jdTextEl.addEventListener('input',()=>{jdCount.textContent=jdTextEl.value.length;jdGo.disabled=jdTextEl.value.trim().length<100||loading;});
+jdGo.onclick=async()=>{
+  const jd=jdTextEl.value.trim();if(jd.length<100||loading)return;
+  closeJD();loading=true;send.disabled=true;
+  addU('Job description shared for a fit assessment ('+jd.length+' characters)');addT();
+  try{
+    const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jd,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona})});
+    const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);
+    messages.push({role:'user',content:'(I shared a job description for a fit assessment.)'});
+    messages.push({role:'assistant',content:txt});
+    jdTextEl.value='';jdCount.textContent='0';jdGo.disabled=true;
+  }catch(e){rmT();addB("The assessment service isn't reachable right now. Email the JD to ravi.gokal@gmail.com and he'll come back to you directly.");}
+  finally{loading=false;send.disabled=false;}
+};
 </script>
 </body>
 </html>
