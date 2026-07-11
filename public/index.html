@@ -199,8 +199,24 @@ hold(document.getElementById('bUp'),'ArrowUp');
 hold(document.getElementById('bDown'),'ArrowDown');
 
 const ytag=document.getElementById('ytag'),card=document.getElementById('jobcard'),gprompt=document.getElementById('gprompt');
-function showCard(i){activeJob=i;const j=JOBS[i];document.getElementById('jc-yr').textContent=j.yr;document.getElementById('jc-org').textContent=j.org.replace('\n',' ');document.getElementById('jc-role').textContent=j.role;document.getElementById('jc-blurb').textContent=j.blurb;card.classList.add('show');gprompt.style.opacity=0;}
-function hideCard(){card.classList.remove('show');activeJob=-1;gprompt.style.opacity=1;}
+// themed question chips per job, same order as JOBS — swapped in while standing at a building
+const JOB_CHIPS=[
+  ["What's he doing at the Fair Work Commission?","Tell me about the 200-story backlog","How does he use AI in his delivery work?"],
+  ["What was the BlackBerry to Intune project?","How does he handle high-threat security work?"],
+  ["What's Te Au Reka?","How did he win the judiciary's endorsement?"],
+  ["What was his role in the Safety Camera Programme?","Has he done procurement work?"],
+  ["How did he secure Microsoft 365 for a high-threat ministry?","Has he written business cases?"],
+  ["Tell me the million-dollar saving story","What happened with 20 years of archived email?"],
+  ["What's the IoT roadside enforcement platform?","Has he been a Product Owner?"],
+  ["What did he do at the Tertiary Education Commission?","What's his change management experience?"],
+  ["How did he keep myMSD running through outages?","Has he worked at scale in social services?"],
+  ["What did he do at the University of Auckland?","Tell me about his first Scrum squad"],
+  ["What did he do in the health sector?","Why did a PM call him a business analyst extraordinaire?"],
+  ["Where did his career start?","What was his first analyst role?"]
+];
+function showCard(i){activeJob=i;const j=JOBS[i];document.getElementById('jc-yr').textContent=j.yr;document.getElementById('jc-org').textContent=j.org.replace('\n',' ');document.getElementById('jc-role').textContent=j.role;document.getElementById('jc-blurb').textContent=j.blurb;card.classList.add('show');gprompt.style.opacity=0;
+  if(JOB_CHIPS[i])setChips(JOB_CHIPS[i]);}
+function hideCard(){card.classList.remove('show');activeJob=-1;gprompt.style.opacity=1;setChips(baseChips());}
 card.addEventListener('click',()=>{hideCard();cardLock=true;});
 
 // drawing helpers
@@ -476,6 +492,7 @@ let persona=sessionStorage.getItem('ravi_persona')||null;
 const chips=document.getElementById('chips'),thread=document.getElementById('thread'),input=document.getElementById('input'),send=document.getElementById('send');
 let messages=[],loading=false,started=false;
 function setChips(list){chips.innerHTML='';list.forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;b.onclick=()=>ask(q);chips.appendChild(b);});}
+function baseChips(){return (persona&&PERSONAS[persona])?PERSONAS[persona].chips:SUGGESTED;}
 function renderGreeting(){
   const r=document.createElement('div');r.className='rowB';r.id='greet';
   const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';
