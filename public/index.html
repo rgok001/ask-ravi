@@ -138,6 +138,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
     <div class="intro-card">
       <h1>Don't read my CV. <span class="a">Interrogate it.</span></h1>
       <p>Thanks for stopping by. Instead of scrolling through a CV, you can just ask. I've spent 13 years as a business analyst across government and beyond. Go ahead and ask me about any of it. <span class="walknote" style="color:#6a6a70">(Walk the timeline on the left while you're at it.)</span></p>
+      <p style="margin-top:8px;font-size:.82rem;color:#6a7285">Questions are logged anonymously (no names, no answers) so I can see what people ask.</p>
     </div>
     <div id="chips"></div>
     <div id="thread"></div>
@@ -152,6 +153,12 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 
 <script>
 const API_URL="/api/ask";
+const SESSION_ID=(()=>{
+  const k='ravi_session_id';
+  let id=sessionStorage.getItem(k);
+  if(!id){ id=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2)); sessionStorage.setItem(k,id); }
+  return id;
+})();
 
 // top(present) → bottom(past)
 const JOBS=[
@@ -468,7 +475,7 @@ function addB(t){const r=document.createElement('div');r.className='rowB';const 
 function addT(){const r=document.createElement('div');r.className='rowB';r.id='th';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.innerHTML='<span class="blink">thinking</span><span class="blink" style="animation-delay:.3s">.</span><span class="blink" style="animation-delay:.6s">.</span>';r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
 function rmT(){const t=document.getElementById('th');if(t)t.remove();}
 async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
-  try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});}
+  try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});}
   catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government — secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
   finally{loading=false;send.disabled=false;input.focus();}}
 send.onclick=()=>ask(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value);});

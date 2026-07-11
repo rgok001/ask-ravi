@@ -64,6 +64,23 @@ You may quote or paraphrase these when relevant. Attribute to the named person a
 SIGNATURE STRENGTHS: secure cloud migration in high-threat/regulated environments; turning ambiguous policy/threat into concrete requirements; owning large backlogs end-to-end; cost optimisation (the $1M+ M365 journal saving); early, practical adoption of AI/LLM tooling to lift delivery throughput; leading mixed vendor/in-house squads; stakeholder trust at judiciary/steering-committee level. Consistently described by managers and peers across 15 years as analytical, thorough, fast, and exceptional at building trusted relationships in complex environments.
 `;
 
+import { neon } from "@neondatabase/serverless";
+
+const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
+
+// Fire-and-forget: never let logging failures affect the answer.
+function logQuestion({ sessionId, question, referrer, pagePath }) {
+  if (!sql || !question) return;
+  try {
+    sql`
+      INSERT INTO questions (session_id, question, referrer, page_path)
+      VALUES (${sessionId || null}, ${question}, ${referrer || null}, ${pagePath || null})
+    `.catch((e) => console.error("[log] insert failed:", e));
+  } catch (e) {
+    console.error("[log] sync failed:", e);
+  }
+}
+
 // --- Simple in-memory rate limit: caps requests per IP per window. ---
 // Protects your API budget from one person hammering the endpoint.
 // (Resets when the serverless instance recycles — fine for a personal project.)
@@ -97,7 +114,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages } = req.body || {};
+    const { messages, sessionId, referrer, pagePath } = req.body || {};
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "messages[] required" });
     }
@@ -107,6 +124,9 @@ export default async function handler(req, res) {
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content || "").slice(0, 1500),
     }));
+
+    const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
+    logQuestion({ sessionId, question: lastUser?.content, referrer, pagePath });
 
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
