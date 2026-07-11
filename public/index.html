@@ -466,11 +466,11 @@ const SUGGESTED=["Why should I hire Ravi?","Tell me about his security work","Wh
 // persona paths — each seeds different chips and a short client-side ack (no API cost)
 const PERSONAS={
   recruiter:{label:"I'm a recruiter",chips:["Give me the 60-second pitch","Where is he based and what are his work rights?","Contract or permanent — what's his history?","What do his references say?"],
-    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything — or start with one of the prompts below."},
+    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything — or start with one of the prompts above."},
   manager:{label:"I'm a hiring manager",chips:["What's his biggest delivery win?","How does he handle difficult stakeholders?","Has he led teams?","How does he use AI in his work?"],
-    ack:"The hiring-manager view — good. He's led mixed vendor/in-house squads, owned a 200+ story backlog, and reported to steering committees. Tell me what your role needs and I'll map him to it, or pick a prompt below."},
+    ack:"The hiring-manager view — good. He's led mixed vendor/in-house squads, owned a 200+ story backlog, and reported to steering committees. Tell me what your role needs and I'll map him to it, or pick a prompt above."},
   curious:{label:"Just curious",chips:["What's the most unusual project he's worked on?","Tell me the million-dollar saving story","What's the IoT roadside enforcement platform?","What do people say about him?"],
-    ack:"Welcome — no agenda required. In here: a speed-camera programme, security work for a high-threat ministry, and a saving worth a million dollars a year. Pull a thread below, or ask your own."}
+    ack:"Welcome — no agenda required. In here: a speed-camera programme, security work for a high-threat ministry, and a saving worth a million dollars a year. Pull a thread above, or ask your own."}
 };
 let persona=sessionStorage.getItem('ravi_persona')||null;
 const chips=document.getElementById('chips'),thread=document.getElementById('thread'),input=document.getElementById('input'),send=document.getElementById('send');
