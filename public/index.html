@@ -465,12 +465,12 @@ function showShareFallback(url){
 const SUGGESTED=["Why should I hire Ravi?","Tell me about his security work","What's his biggest cost saving?","Has he led teams?","How does he use AI in his work?","What do people say about him?"];
 // persona paths — each seeds different chips and a short client-side ack (no API cost)
 const PERSONAS={
-  recruiter:{label:"I'm a recruiter",chips:["Give me the 60-second pitch","Where is he based and what are his work rights?","Contract or permanent — what's his history?","What do his references say?"],
-    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything — or start with one of the prompts above."},
+  recruiter:{label:"I'm a recruiter",chips:["Give me the 60-second pitch","Where is he based and what are his work rights?","Contract or permanent: what's his history?","What do his references say?"],
+    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything, or start with one of the prompts above."},
   manager:{label:"I'm a hiring manager",chips:["What's his biggest delivery win?","How does he handle difficult stakeholders?","Has he led teams?","How does he use AI in his work?"],
-    ack:"The hiring-manager view — good. He's led mixed vendor/in-house squads, owned a 200+ story backlog, and reported to steering committees. Tell me what your role needs and I'll map him to it, or pick a prompt above."},
+    ack:"Good, the hiring manager view. He's led mixed vendor/in-house squads, owned a 200+ story backlog, and reported to steering committees. Tell me what your role needs and I'll map him to it, or pick a prompt above."},
   curious:{label:"Just curious",chips:["What's the most unusual project he's worked on?","Tell me the million-dollar saving story","What's the IoT roadside enforcement platform?","What do people say about him?"],
-    ack:"Welcome — no agenda required. In here: a speed-camera programme, security work for a high-threat ministry, and a saving worth a million dollars a year. Pull a thread above, or ask your own."}
+    ack:"Welcome, no agenda required. In here: a speed-camera programme, security work for a high-threat ministry, and a saving worth a million dollars a year. Pull a thread above, or ask your own."}
 };
 let persona=sessionStorage.getItem('ravi_persona')||null;
 const chips=document.getElementById('chips'),thread=document.getElementById('thread'),input=document.getElementById('input'),send=document.getElementById('send');
@@ -480,7 +480,7 @@ function renderGreeting(){
   const r=document.createElement('div');r.className='rowB';r.id='greet';
   const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';
   const b=document.createElement('div');b.className='bB';
-  const p=document.createElement('p');p.textContent="Hi there — I'm the AI that knows Ravi's 13-year career inside out. So I can point you at the right things first: who am I talking to?";
+  const p=document.createElement('p');p.textContent="Hi there. I'm the AI that knows Ravi's 13-year career inside out. So I can point you at the right things first: who am I talking to?";
   b.appendChild(p);
   const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px';
   Object.entries(PERSONAS).forEach(([k,v])=>{const btn=document.createElement('button');btn.className='chip';btn.dataset.persona=k;btn.textContent=v.label;btn.onclick=()=>choosePersona(k);wrap.appendChild(btn);});
@@ -510,7 +510,7 @@ function addT(){const r=document.createElement('div');r.className='rowB';r.id='t
 function rmT(){const t=document.getElementById('th');if(t)t.remove();}
 async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
   try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});}
-  catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government — secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
+  catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government. Secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
   finally{loading=false;send.disabled=false;input.focus();}}
 send.onclick=()=>ask(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value);});
 </script>
