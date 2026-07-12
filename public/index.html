@@ -183,6 +183,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 
 <script>
 const API_URL="/api/ask";
+const STREAM_URL="/api/stream";
 const SESSION_ID=(()=>{
   const k='ravi_session_id';
   let id=sessionStorage.getItem(k);
@@ -575,10 +576,43 @@ function addActions(subject,copyText){
   r.appendChild(wrap);thread.appendChild(r);down();
 }
 function rmT(){const t=document.getElementById('th');if(t)t.remove();}
+// mirror of the server-side scrubs, needed because streamed text bypasses them
+function humaniseC(t){return t.replace(/\s*—\s*/g,', ').replace(/,\s*,/g,',').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*\n]+)\*/g,'$1');}
+function signalsOf(raw){let text=raw,intent=false,suggestions=[];
+  if(/\[\[INTENT\]\]/.test(text)){intent=true;text=text.replace(/\[\[INTENT\]\]/g,'');}
+  const m=text.match(/\[\[NEXT\]\]([^\n]*)/);
+  if(m)suggestions=m[1].split('|').map(s=>s.trim()).filter(s=>s&&s.length<=80).slice(0,3);
+  text=text.replace(/\[\[NEXT\]\][^\n]*/g,'');
+  return {text:humaniseC(text).trim(),intent,suggestions};}
+// what to show mid-stream: control tokens stripped, trailing partial token held back
+function displayOf(acc){
+  let t=acc.replace(/\[\[INTENT\]\]/g,'').replace(/\[\[NEXT\]\][^\n]*/g,'');
+  t=t.replace(/\[{1,2}[A-Z]{0,6}\]{0,2}\s*$/,'');
+  return humaniseC(t).replace(/\s+$/,'');}
+function addStream(){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.style.whiteSpace='pre-wrap';r.appendChild(g);r.appendChild(b);thread.appendChild(r);
+  requestAnimationFrame(()=>{thread.scrollTo({top:Math.max(0,r.offsetTop-thread.offsetTop-8),behavior:'smooth'});});
+  return b;}
 async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
-  try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});
-    if(d.intent)addActions('Re: '+q.slice(0,70)+' (via Ask Ravi)');
-    if(d.suggestions&&d.suggestions.length)setChips(d.suggestions);}
+  const payload=JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona});
+  try{
+    let txt='',intent=false,suggestions=[],streamed=false,acc='';
+    try{
+      const res=await fetch(STREAM_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:payload});
+      if(res.ok&&res.body&&(res.headers.get('content-type')||'').includes('text/plain')){
+        rmT();const b=addStream();streamed=true;
+        const reader=res.body.getReader();const dec=new TextDecoder();
+        while(true){const {done,value}=await reader.read();if(done)break;acc+=dec.decode(value,{stream:true});b.textContent=displayOf(acc);}
+        const s=signalsOf(acc);txt=s.text||'…';intent=s.intent;suggestions=s.suggestions;b.textContent=txt;
+      }
+    }catch(e){if(streamed&&acc){const s=signalsOf(acc);txt=s.text||'…';intent=s.intent;suggestions=s.suggestions;}else{streamed=false;}}
+    if(!streamed){
+      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:payload});
+      const d=await res.json();rmT();txt=d.text||d.error||'…';intent=!!d.intent;suggestions=d.suggestions||[];addB(txt);
+    }
+    messages.push({role:'assistant',content:txt});
+    if(intent)addActions('Re: '+q.slice(0,70)+' (via Ask Ravi)');
+    if(suggestions&&suggestions.length)setChips(suggestions);
+  }
   catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government. Secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
   finally{loading=false;send.disabled=false;input.focus();}}
 send.onclick=()=>ask(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value);});
