@@ -15,6 +15,8 @@ You are RAVI-OS, the on-the-record representative for Ravi Gokal's career. You a
 7. WRITING STYLE: Write like a sharp human colleague, not an AI assistant. Never use em dashes; use commas, full stops, or a new sentence instead (the dossier below uses them, do not copy that habit). Avoid stock AI phrasing such as "delve", "landscape", "testament to", "it's worth noting", "I hope this helps", and never open with "Great question". Vary sentence length. Plain, confident, conversational prose. Don't follow a template: vary how answers open and close, don't end every reply the same way, and when you share contact details, weave them into a sentence ("easiest is to just email him at ravi.gokal@gmail.com") rather than dumping a formatted block. Plain text only: the interface renders raw text, so never use markdown formatting (no **bold**, *italics*, bullet lists, or # headings).
 8. BALANCED PICTURE: Ravi's career spans delivery leadership, case-management transformation, integration, cost optimisation, Agile ways of working, procurement, IoT platforms, and security. Do not over-index on the security work. Unless the visitor asks about security specifically, draw examples from across the whole career and lead with whichever domain best fits their question.
 9. CV DOWNLOAD: A PDF of Ravi's full CV is available via the "CV" button at the top right of this page. If a visitor asks for his CV, resume, or a copy of his experience to keep or submit, point them to that button rather than saying you can't provide it.
+10. WARM LEADS: If the visitor asks about Ravi's availability, notice period, rates, interest in a role, or how to contact or hire him, that is a warm lead. Answer naturally, and then output the exact token [[INTENT]] alone on the final line of your reply. Never mention or explain the token in your prose.
+11. FOLLOW-UP PROMPTS: End every reply with one line in exactly this format: [[NEXT]] first question | second question | third question. These are 2-3 short follow-up questions (under 60 characters each) the visitor might naturally ask next, answerable from the dossier and relevant to the conversation so far. If rule 10 also applies, put [[INTENT]] on its own line first, then the [[NEXT]] line. Never mention this line in your prose.
 
 === RAVI GOKAL — DOSSIER ===
 Title: Senior Business Analyst & Delivery Lead. New Zealand Citizen, Brisbane resident.
@@ -86,12 +88,12 @@ import { neon } from "@neondatabase/serverless";
 const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 
 // Fire-and-forget: never let logging failures affect the answer.
-function logQuestion({ sessionId, question, referrer, pagePath, persona }) {
+function logQuestion({ sessionId, question, referrer, pagePath, persona, intent }) {
   if (!sql || !question) return;
   try {
     sql`
-      INSERT INTO questions (session_id, question, referrer, page_path, persona)
-      VALUES (${sessionId || null}, ${question}, ${referrer || null}, ${pagePath || null}, ${persona || null})
+      INSERT INTO questions (session_id, question, referrer, page_path, persona, intent)
+      VALUES (${sessionId || null}, ${question}, ${referrer || null}, ${pagePath || null}, ${persona || null}, ${intent || false})
     `.catch((e) => console.error("[log] insert failed:", e));
   } catch (e) {
     console.error("[log] sync failed:", e);
@@ -117,6 +119,28 @@ function humanise(t) {
     .replace(/,\s*,/g, ",")
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/\*([^*\n]+)\*/g, "$1");
+}
+
+// Pull the [[INTENT]] and [[NEXT]] control tokens (rules 10-11) out of the
+// model's reply so they never reach the visitor.
+function extractSignals(raw) {
+  let text = raw;
+  let intent = false;
+  let suggestions = [];
+  if (/\[\[INTENT\]\]/.test(text)) {
+    intent = true;
+    text = text.replace(/\[\[INTENT\]\]/g, "");
+  }
+  const m = text.match(/\[\[NEXT\]\]([^\n]*)/);
+  if (m) {
+    suggestions = m[1]
+      .split("|")
+      .map((s) => s.trim())
+      .filter((s) => s && s.length <= 80)
+      .slice(0, 3);
+  }
+  text = text.replace(/\[\[NEXT\]\][^\n]*/g, "");
+  return { text: text.trim(), intent, suggestions };
 }
 
 // Visitor-selected path from the front end. Whitelisted here so arbitrary
@@ -223,7 +247,6 @@ export default async function handler(req, res) {
     }));
 
     const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
-    logQuestion({ sessionId, question: lastUser?.content, referrer, pagePath, persona: personaKey });
 
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -247,14 +270,17 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: "Upstream error", detail });
     }
     const data = await r.json();
-    const text = humanise(
-      (data.content || [])
-        .map((b) => (b.type === "text" ? b.text : ""))
-        .filter(Boolean)
-        .join("\n")
-        .trim()
+    const { text, intent, suggestions } = extractSignals(
+      humanise(
+        (data.content || [])
+          .map((b) => (b.type === "text" ? b.text : ""))
+          .filter(Boolean)
+          .join("\n")
+          .trim()
+      )
     );
-    return res.status(200).json({ text: text || "…" });
+    logQuestion({ sessionId, question: lastUser?.content, referrer, pagePath, persona: personaKey, intent });
+    return res.status(200).json({ text: text || "…", intent, suggestions });
   } catch (e) {
     return res.status(500).json({ error: String(e) });
   }

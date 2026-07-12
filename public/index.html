@@ -556,9 +556,29 @@ function addB(t){const r=document.createElement('div');r.className='rowB';const 
   requestAnimationFrame(()=>{thread.scrollTo({top:Math.max(0,r.offsetTop-thread.offsetTop-8),behavior:'smooth'});});
 }
 function addT(){const r=document.createElement('div');r.className='rowB';r.id='th';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.innerHTML='<span class="blink">thinking</span><span class="blink" style="animation-delay:.3s">.</span><span class="blink" style="animation-delay:.6s">.</span>';r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
+// action row under an answer: warm-lead conversions (email / copy)
+function addActions(subject,copyText){
+  const r=document.createElement('div');r.className='rowB';
+  const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:8px;flex-wrap:wrap;padding-left:17px';
+  const mail=document.createElement('a');mail.className='chip jdc';mail.textContent='✉ Email Ravi about this';
+  mail.href='mailto:ravi.gokal@gmail.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent('Hi Ravi,\n\nI was just talking to RAVI-OS on your site.\n\n');
+  wrap.appendChild(mail);
+  if(copyText){
+    const cp=document.createElement('button');cp.className='chip';cp.textContent='Copy assessment';
+    cp.onclick=async()=>{
+      try{await navigator.clipboard.writeText(copyText);toast('Assessment copied ✓');return;}catch(e){}
+      try{const ta=document.createElement('textarea');ta.value=copyText;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();const ok=document.execCommand('copy');document.body.removeChild(ta);if(ok){toast('Assessment copied ✓');return;}}catch(e){}
+      toast('Copy failed, select the text manually');
+    };
+    wrap.appendChild(cp);
+  }
+  r.appendChild(wrap);thread.appendChild(r);down();
+}
 function rmT(){const t=document.getElementById('th');if(t)t.remove();}
 async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
-  try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});}
+  try{const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona})});const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);messages.push({role:'assistant',content:txt});
+    if(d.intent)addActions('Re: '+q.slice(0,70)+' (via Ask Ravi)');
+    if(d.suggestions&&d.suggestions.length)setChips(d.suggestions);}
   catch(e){rmT();addB("[ connection unavailable ] RAVI-OS needs its backend. In short: I'm a Senior BA & Delivery Lead, 13+ years across NZ government. Secure cloud migrations, IoT platforms, an M365 migration saving $1M+/yr. ravi.gokal@gmail.com");}
   finally{loading=false;send.disabled=false;input.focus();}}
 send.onclick=()=>ask(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value);});
@@ -579,6 +599,7 @@ jdGo.onclick=async()=>{
     const d=await res.json();rmT();const txt=d.text||d.error||'…';addB(txt);
     messages.push({role:'user',content:'(I shared a job description for a fit assessment.)'});
     messages.push({role:'assistant',content:txt});
+    if(res.ok)addActions('Re: role fit assessment (via Ask Ravi)',txt);
     jdTextEl.value='';jdCount.textContent='0';jdGo.disabled=true;
   }catch(e){rmT();addB("The assessment service isn't reachable right now. Email the JD to ravi.gokal@gmail.com and he'll come back to you directly.");}
   finally{loading=false;send.disabled=false;}
