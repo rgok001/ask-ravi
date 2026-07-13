@@ -70,7 +70,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 .intro-card h1{font-family:'Space Grotesk';font-weight:700;font-size:clamp(1.7rem,3.6vw,2.6rem);line-height:1.05;color:var(--ink)}
 .intro-card h1 .a{color:var(--blue-deep)}
 .intro-card p{margin-top:14px;color:var(--ink-2);font-size:1.08rem;line-height:1.5;max-width:560px}
-#thread{flex:1;overflow-y:auto;padding:14px 30px;display:flex;flex-direction:column;gap:16px;max-width:760px;width:100%;margin:0 auto}
+#thread{flex:1;min-height:0;overflow-y:auto;padding:14px 30px;display:flex;flex-direction:column;gap:16px;max-width:760px;width:100%;margin:0 auto}
 .rowU{display:flex;justify-content:flex-end}.rowB{display:flex;flex-direction:column;gap:6px}
 .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--blue-deep)}
 .bU{background:var(--panel);border:1px solid var(--border);border-radius:14px 14px 2px 14px;padding:11px 15px;max-width:80%;font-size:1.02rem;line-height:1.45;color:var(--ink)}
@@ -104,11 +104,24 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 .blink{animation:bl 1.2s steps(2) infinite}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
-/* MOBILE: no game, chat only */
+/* MOBILE: no game, chat only. Compact header/intro, one-row swipeable chips,
+   thread scrolls internally under a stable composer. */
 @media(max-width:780px){
   #rail-game{display:none}
-  body{overflow:auto}
+  body{overflow:hidden}
   .walknote{display:none}
+  .chat-head{padding:10px 14px}
+  .intro-card{padding:14px 16px 2px}
+  .intro-card h1{font-size:1.45rem}
+  .intro-card p{font-size:.92rem;margin-top:8px;line-height:1.4}
+  #chips{flex-wrap:nowrap;overflow-x:auto;padding:8px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #chips::-webkit-scrollbar{display:none}
+  #thread{padding:10px 16px}
+  .bU{font-size:.95rem}
+  .bB{font-size:.98rem}
+  .composer{margin:0 12px 12px;width:calc(100% - 24px);padding:4px 4px 4px 12px}
+  .composer input{font-size:.95rem;padding:10px 0}
+  .send{padding:11px 14px;font-size:12px;white-space:nowrap}
 }
 </style>
 </head>
@@ -552,9 +565,10 @@ renderGreeting();
 if(persona&&PERSONAS[persona])choosePersona(persona,true); // returning visitor in same session
 function down(){thread.scrollTop=thread.scrollHeight;}
 function addU(t){const r=document.createElement('div');r.className='rowU';const b=document.createElement('div');b.className='bU';b.textContent=t;r.appendChild(b);thread.appendChild(r);down();}
+function scrollToRow(r){const tr=thread.getBoundingClientRect();const rr=r.getBoundingClientRect();thread.scrollTop=Math.max(0,thread.scrollTop+rr.top-tr.top-8);}
 function addB(t){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';t.split('\n').forEach(l=>{const p=document.createElement('p');p.textContent=l;b.appendChild(p);});r.appendChild(g);r.appendChild(b);thread.appendChild(r);
   // scroll so the START of the answer is at the top of the view (not the bottom)
-  requestAnimationFrame(()=>{thread.scrollTo({top:Math.max(0,r.offsetTop-thread.offsetTop-8),behavior:'smooth'});});
+  scrollToRow(r);
 }
 function addT(){const r=document.createElement('div');r.className='rowB';r.id='th';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.innerHTML='<span class="blink">thinking</span><span class="blink" style="animation-delay:.3s">.</span><span class="blink" style="animation-delay:.6s">.</span>';r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();}
 // action row under an answer: warm-lead conversions (email / copy)
@@ -589,8 +603,7 @@ function displayOf(acc){
   let t=acc.replace(/\[\[INTENT\]\]/g,'').replace(/\[\[NEXT\]\][^\n]*/g,'');
   t=t.replace(/\[{1,2}[A-Z]{0,6}\]{0,2}\s*$/,'');
   return humaniseC(t).replace(/\s+$/,'');}
-function addStream(){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.style.whiteSpace='pre-wrap';r.appendChild(g);r.appendChild(b);thread.appendChild(r);
-  requestAnimationFrame(()=>{thread.scrollTo({top:Math.max(0,r.offsetTop-thread.offsetTop-8),behavior:'smooth'});});
+function addStream(){const r=document.createElement('div');r.className='rowB';const g=document.createElement('div');g.className='tag';g.textContent='RAVI-OS';const b=document.createElement('div');b.className='bB';b.style.whiteSpace='pre-wrap';r.appendChild(g);r.appendChild(b);thread.appendChild(r);down();
   return b;}
 async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU(q);messages.push({role:'user',content:q});loading=true;send.disabled=true;addT();
   const payload=JSON.stringify({messages,sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona});
@@ -601,7 +614,7 @@ async function ask(q){q=(q||'').trim();if(!q||loading)return;input.value='';addU
       if(res.ok&&res.body&&(res.headers.get('content-type')||'').includes('text/plain')){
         rmT();const b=addStream();streamed=true;
         const reader=res.body.getReader();const dec=new TextDecoder();
-        while(true){const {done,value}=await reader.read();if(done)break;acc+=dec.decode(value,{stream:true});b.textContent=displayOf(acc);}
+        while(true){const {done,value}=await reader.read();if(done)break;acc+=dec.decode(value,{stream:true});b.textContent=displayOf(acc);down();}
         const s=signalsOf(acc);txt=s.text||'…';intent=s.intent;suggestions=s.suggestions;b.textContent=txt;
       }
     }catch(e){if(streamed&&acc){const s=signalsOf(acc);txt=s.text||'…';intent=s.intent;suggestions=s.suggestions;}else{streamed=false;}}
