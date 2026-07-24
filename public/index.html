@@ -23,30 +23,8 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 /* layout: game rail (left) + scrolling chat column (right), under the fixed nav */
 #app{display:flex;height:100vh;height:100dvh;padding-top:64px}
 
-/* ---- vertical game rail ---- */
-#rail-game{flex:0 0 340px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:#bfe6f5;position:relative}
-.rg-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
-.rg-head .t{font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--ink)}
-.rg-head .y{font-weight:700;font-size:12px;color:#fff;background:var(--ink);border-radius:9999px;padding:4px 12px}
-#gwrap{flex:1;position:relative;overflow:hidden}
-canvas#game{position:absolute;inset:0;width:100%;height:100%}
-#gprompt{position:absolute;bottom:64px;left:0;right:0;text-align:center;z-index:5;font-weight:700;font-size:11px;letter-spacing:.04em;color:#16233B;background:rgba(224,150,31,.95);margin:0 34px;padding:7px 6px;border-radius:9999px;animation:bl 1.1s steps(2) infinite}
-@keyframes bl{50%{opacity:.45}}
-/* job card pops over the rail */
-#jobcard{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%) scale(.95);z-index:8;
-  background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);
-  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
-#jobcard.show{opacity:1;transform:translateY(-50%) scale(1)}
-#jobcard .yr{font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-deep)}
-#jobcard .org{font-weight:800;font-size:16px;margin:8px 0 4px;line-height:1.25;color:var(--ink)}
-#jobcard .role{font-weight:600;font-size:14px;color:var(--ink-2)}
-#jobcard .blurb{margin-top:8px;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
-#jobcard .x{font-size:11px;font-weight:600;color:var(--muted);margin-top:12px}
-/* vertical controls */
-#gcontrols{display:flex;justify-content:center;gap:12px;padding:12px;background:var(--panel);border-top:1px solid var(--border)}
-.btn{font-weight:700;font-size:14px;color:var(--ink);background:var(--subtle);border:1px solid var(--border2);border-radius:12px;padding:12px 22px;cursor:pointer;box-shadow:var(--shadow-sm);user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.btn:active{transform:translateY(1px);box-shadow:none}
 
+@keyframes bl{50%{opacity:.45}}
 /* ---- chat column: a scrolling page ---- */
 #chat{flex:1;min-width:0;overflow-y:auto;background:var(--bg)}
 .wrap{max-width:960px;margin:0 auto;padding:0 32px}
@@ -118,11 +96,28 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 .blink{animation:bl 1.2s steps(2) infinite}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
+/* ---- career timeline ---- */
+#timeline{margin:8px 0 56px}
+#timeline h2{font-weight:800;font-size:26px;letter-spacing:-0.01em;color:var(--ink)}
+.tl-sub{margin:6px 0 22px;font-size:14px;color:var(--ink-2)}
+#tl-list{position:relative;padding-left:28px}
+#tl-list::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:22px}
+.tl-item::before{content:'';position:absolute;left:-25px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:3px solid var(--accent)}
+.tl-yr{display:inline-block;font-weight:700;font-size:12px;color:#fff;background:var(--ink);border-radius:9999px;padding:4px 12px;margin-bottom:8px}
+.tl-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-sm);padding:18px 20px}
+.tl-org{font-weight:800;font-size:16px;color:var(--ink)}
+.tl-role{margin-top:2px;font-weight:600;font-size:13.5px;color:var(--accent-deep)}
+.tl-blurb{margin-top:8px;font-size:14px;line-height:1.6;color:var(--ink-2)}
+.tl-ask{margin-top:12px;background:var(--subtle);border:1px solid transparent;color:var(--ink);font-family:inherit;font-weight:600;font-size:12.5px;border-radius:9999px;padding:7px 14px;cursor:pointer;transition:.15s}
+.tl-ask:hover{border-color:var(--border2)}
+.nv-c{display:flex;gap:26px}
+.nv-c a{font-weight:600;font-size:14px;color:var(--ink-2);text-decoration:none;transition:.15s}
+.nv-c a:hover{color:var(--ink)}
 /* MOBILE: no game, single scrolling column */
 @media(max-width:780px){
-  #rail-game{display:none}
   body{overflow:hidden}
-  .walknote{display:none}
+  .nv-c{display:none}
   #topnav{padding:0 16px;height:56px}
   #app{padding-top:56px}
   .hero{padding:22px 20px 0}
@@ -145,6 +140,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 <body>
 <nav id="topnav">
   <div class="nv-l">Ravi-OS</div>
+  <div class="nv-c"><a href="#chatcard">AI chat</a><a href="#timeline">Timeline</a></div>
   <div class="nv-r">
     <a class="hbtn ghost" id="cvBtn" href="/Ravi-Gokal-CV.pdf" download="Ravi-Gokal-CV.pdf" title="Download Ravi's CV as a PDF">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -162,31 +158,12 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
 </nav>
 <div id="app">
 
-  <!-- vertical game rail -->
-  <aside id="rail-game">
-    <div class="rg-head"><span class="t">CAREER WALK</span><span class="y" id="ytag">2025</span></div>
-    <div id="gwrap">
-      <canvas id="game"></canvas>
-      <div id="gprompt">▼ WALK DOWN = BACK IN TIME</div>
-      <div id="jobcard">
-        <div class="yr" id="jc-yr"></div>
-        <div class="org" id="jc-org"></div>
-        <div class="role" id="jc-role"></div>
-        <div class="blurb" id="jc-blurb"></div>
-        <div class="x">keep walking ▼</div>
-      </div>
-    </div>
-    <div id="gcontrols">
-      <div class="btn" id="bUp">▲</div>
-      <div class="btn" id="bDown">▼</div>
-    </div>
-  </aside>
 
   <!-- chat column -->
   <section id="chat">
     <div class="hero">
       <h1>Don't read my CV. <span class="a">Interrogate it.</span></h1>
-      <p class="sub">Thanks for stopping by. Instead of scrolling through a CV, you can just ask. I've spent 13 years as a business analyst across government and beyond. Go ahead and ask me about any of it. <span class="walknote">(Walk the timeline on the left while you're at it.)</span></p>
+      <p class="sub">Thanks for stopping by. Instead of scrolling through a CV, you can just ask. I've spent 13 years as a business analyst across government and beyond. Go ahead and ask me about any of it.</p>
       <p class="fine">Questions and pasted job descriptions are logged anonymously (no names, no answers) so I can see what people ask.</p>
     </div>
     <div class="wrap">
@@ -224,6 +201,11 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%}
           <div class="skills"><span>Agile &amp; Scrum</span><span>Stakeholder management</span><span>BPMN process mapping</span><span>Secure cloud (M365 &amp; Azure)</span><span>Backlog ownership</span></div>
         </div>
       </div>
+      <div id="timeline">
+        <h2>Career timeline</h2>
+        <p class="tl-sub">Thirteen years, newest first. Ask the assistant about any of them.</p>
+        <div id="tl-list"></div>
+      </div>
     </div>
   </section>
 
@@ -255,29 +237,6 @@ const JOBS=[
   {yr:"2011–12",org:"NORTH\nPOWER",role:"Process Analyst",blurb:"The first rung. Mapping operational processes in the utilities sector — the very first analyst role, where the story begins.",building:"powerplant",col:"#e0a020"},
 ];
 
-const cv=document.getElementById('game'),ctx=cv.getContext('2d');
-let W=0,H=0,DPR=Math.min(2,devicePixelRatio||1);
-function resize(){const g=document.getElementById('gwrap');const r=g.getBoundingClientRect();W=Math.max(200,r.width||g.offsetWidth||300);H=Math.max(300,r.height||g.offsetHeight||500);cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0);}
-addEventListener('resize',resize);addEventListener('load',resize);
-
-const STATION_GAP=300;
-const WORLD_LEN=(JOBS.length-1)*STATION_GAP+520;
-let py=180;                       // player world-Y (starts near top/present)
-let facing=1, moving=false, frame=0, ftime=0;
-const SPEED=2.4;
-let activeJob=-1, cardLock=false, hasMoved=false;
-function jobY(i){ return 180 + i*STATION_GAP; }   // job 0 (2025) near top
-
-const keys={};
-addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown'){keys[e.key]=true;e.preventDefault();}});
-addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown')keys[e.key]=false;});
-function hold(btn,key){const on=e=>{e.preventDefault();keys[key]=true;};const off=e=>{e.preventDefault();keys[key]=false;};
-  btn.addEventListener('touchstart',on,{passive:false});btn.addEventListener('touchend',off);btn.addEventListener('touchcancel',off);
-  btn.addEventListener('mousedown',on);btn.addEventListener('mouseup',off);btn.addEventListener('mouseleave',off);}
-hold(document.getElementById('bUp'),'ArrowUp');
-hold(document.getElementById('bDown'),'ArrowDown');
-
-const ytag=document.getElementById('ytag'),card=document.getElementById('jobcard'),gprompt=document.getElementById('gprompt');
 // themed question chips per job, same order as JOBS — swapped in while standing at a building
 const JOB_CHIPS=[
   ["What's he doing at the Fair Work Commission?","Tell me about the 200-story backlog","How does he use AI in his delivery work?"],
@@ -293,232 +252,25 @@ const JOB_CHIPS=[
   ["What did he do in the health sector?","Why did a PM call him a business analyst extraordinaire?"],
   ["Where did his career start?","What was his first analyst role?"]
 ];
-function showCard(i){activeJob=i;const j=JOBS[i];document.getElementById('jc-yr').textContent=j.yr;document.getElementById('jc-org').textContent=j.org.replace('\n',' ');document.getElementById('jc-role').textContent=j.role;document.getElementById('jc-blurb').textContent=j.blurb;card.classList.add('show');gprompt.style.opacity=0;
-  if(JOB_CHIPS[i])setChips(JOB_CHIPS[i]);}
-function hideCard(){card.classList.remove('show');activeJob=-1;gprompt.style.opacity=1;setChips(baseChips());}
-card.addEventListener('click',()=>{hideCard();cardLock=true;});
-
-// drawing helpers
-function shade(hex,a){let n=parseInt(hex.slice(1),16);let r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return`rgb(${r},${g},${b})`;}
-// rounded rect helper
-function rrect(x,y,w,h,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
-// soft contact shadow under an object
-function softShadow(cx,by,w){const g=ctx.createRadialGradient(cx,by,2,cx,by,w);g.addColorStop(0,'rgba(20,30,20,.28)');g.addColorStop(1,'rgba(20,30,20,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,by,w,w*0.34,0,0,7);ctx.fill();}
-// ISOMETRIC BOX: a cuboid drawn with a top face + left + right faces, gentle lighting.
-// anchored so its FRONT-BOTTOM edge sits at (cx, baseY). dx/dy = isometric unit.
-function isoBox(cx,baseY,w,d,h,c){
-  const ix=0.86, iy=0.5;                       // iso projection ratios
-  const lx=w/2, ly=d/2;
-  // 8 corners projected
-  const P=(X,Y,Z)=>[cx+(X)*ix, baseY+(Y)*iy - Z];
-  // base rectangle corners (front-bottom center anchor)
-  const fbl=P(-lx, ly,0), fbr=P(lx, ly,0), bbl=P(-lx,-ly,0), bbr=P(lx,-ly,0);
-  const ftl=P(-lx, ly,h), ftr=P(lx, ly,h), btl=P(-lx,-ly,h), btr=P(lx,-ly,h);
-  // right face (lit-ish)
-  ctx.fillStyle=shade(c,-26);ctx.beginPath();ctx.moveTo(...fbr);ctx.lineTo(...bbr);ctx.lineTo(...btr);ctx.lineTo(...ftr);ctx.closePath();ctx.fill();
-  // left/front face (most lit)
-  ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(...fbl);ctx.lineTo(...fbr);ctx.lineTo(...ftr);ctx.lineTo(...ftl);ctx.closePath();ctx.fill();
-  // top face (lightest)
-  ctx.fillStyle=shade(c,30);ctx.beginPath();ctx.moveTo(...ftl);ctx.lineTo(...ftr);ctx.lineTo(...btr);ctx.lineTo(...btl);ctx.closePath();ctx.fill();
-  return {P,lx,ly,h,fbl,fbr,ftl,ftr,btr,btl};
+// ===== career timeline =====
+function askAbout(i){
+  if(JOB_CHIPS[i])setChips(JOB_CHIPS[i]);
+  document.getElementById('chatcard').scrollIntoView({block:'center'});
+  input.focus();
 }
-// rows of windows on the FRONT face of an isoBox
-function isoWindows(box,c,cols,rows){
-  const {P,lx,ly,h}=box, ix=0.86, iy=0.5;
-  for(let r=0;r<rows;r++)for(let cwin=0;cwin<cols;cwin++){
-    const fx=-lx+ (lx*2)*( (cwin+0.7)/(cols+0.4) );
-    const z = h*0.12 + (h*0.78)*(r/(rows));
-    const wx=cx=>cx; // noop
-    const x=P(fx,ly,z)[0], y=P(fx,ly,z)[1];
-    ctx.fillStyle='rgba(180,220,255,.85)';ctx.fillRect(x-4,y-7,8,9);
-    ctx.fillStyle='rgba(120,160,200,.5)';ctx.fillRect(x-4,y-1,8,3);
-  }
-}
-
-// soft isometric building. Anchored front-bottom at (cx, baseY).
-function drawBuilding(j,cx,baseY){
-  const c=j.col,dk=shade(c,-34),lt=shade(c,30),t=j.building;
-  // contact shadow
-  softShadow(cx,baseY+4,52);
-
-  if(t==='powerplant'){
-    const box=isoBox(cx,baseY,86,60,52,c);isoWindows(box,c,3,2);
-    for(const ox of[-30,30]){isoBox(cx+ox,baseY-6,26,22,46,shade(c,8));}
-    // lightning emblem (rounded)
-    ctx.fillStyle='#ffe14d';ctx.beginPath();ctx.moveTo(cx+4,baseY-92);ctx.lineTo(cx-8,baseY-66);ctx.lineTo(cx-1,baseY-66);ctx.lineTo(cx-6,baseY-46);ctx.lineTo(cx+11,baseY-72);ctx.lineTo(cx+2,baseY-72);ctx.closePath();ctx.fill();
-  }
-  else if(t==='hospital'){
-    const box=isoBox(cx,baseY,92,64,96,c);isoWindows(box,'#cfe',3,4);
-    // white band + red cross sign, rounded
-    rrect(cx-13,baseY-92,26,26,5,'#ffffff');ctx.fillStyle='#e23b4e';ctx.fillRect(cx-3,baseY-86,6,14);ctx.fillRect(cx-7,baseY-82,14,6);
-  }
-  else if(t==='university'){
-    const box=isoBox(cx,baseY,90,62,84,c);isoWindows(box,'#caa',3,3);
-    // dome
-    ctx.fillStyle=shade(c,18);ctx.beginPath();ctx.ellipse(cx,baseY-86,22,14,0,Math.PI,2*Math.PI);ctx.fill();
-    ctx.fillStyle=lt;ctx.fillRect(cx-2,baseY-104,4,16);
-    // clock
-    ctx.fillStyle='#f4ecd0';ctx.beginPath();ctx.arc(cx,baseY-78,7,0,7);ctx.fill();ctx.strokeStyle='#333';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx,baseY-78);ctx.lineTo(cx,baseY-82);ctx.moveTo(cx,baseY-78);ctx.lineTo(cx+3,baseY-78);ctx.stroke();
-  }
-  else if(t==='govhall'){
-    const box=isoBox(cx,baseY,92,64,88,c);isoWindows(box,c,3,3);
-    // flag
-    ctx.fillStyle='#888';ctx.fillRect(cx+40,baseY-130,3,46);rrect(cx+43,baseY-130,22,13,2,'#3a6ea5');
-  }
-  else if(t==='transport'){
-    const box=isoBox(cx,baseY,82,58,52,c);isoWindows(box,c,3,2);
-    // gantry
-    ctx.strokeStyle='#666';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx-44,baseY-78);ctx.lineTo(cx+44,baseY-78);ctx.moveTo(cx-44,baseY-78);ctx.lineTo(cx-44,baseY-40);ctx.moveTo(cx+44,baseY-78);ctx.lineTo(cx+44,baseY-40);ctx.stroke();
-    rrect(cx-9,baseY-86,18,9,2,'#222');ctx.fillStyle='#9ad';ctx.fillRect(cx+4,baseY-84,4,4);
-    // speed sign
-    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(cx-34,baseY-58,11,0,7);ctx.fill();ctx.strokeStyle='#d33';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx-34,baseY-58,11,0,7);ctx.stroke();ctx.fillStyle='#222';ctx.font="bold 10px 'Plus Jakarta Sans'";ctx.textAlign='center';ctx.fillText('50',cx-34,baseY-54);
-  }
-  else if(t==='police'){
-    const box=isoBox(cx,baseY,92,64,94,c);isoWindows(box,c,3,3);
-    // blue lamp
-    ctx.fillStyle='#3a6ee8';ctx.beginPath();ctx.arc(cx,baseY-104,7,0,7);ctx.fill();ctx.fillStyle='#9ac4ff';ctx.beginPath();ctx.arc(cx-2,baseY-106,3,0,7);ctx.fill();
-    // badge/shield
-    ctx.fillStyle='#ffd24d';ctx.beginPath();ctx.moveTo(cx,baseY-92);ctx.lineTo(cx-11,baseY-84);ctx.lineTo(cx-11,baseY-70);ctx.lineTo(cx,baseY-62);ctx.lineTo(cx+11,baseY-70);ctx.lineTo(cx+11,baseY-84);ctx.closePath();ctx.fill();
-  }
-  else if(t==='embassy'){
-    const box=isoBox(cx,baseY,86,60,66,c);isoWindows(box,c,3,2);
-    // big globe
-    const gy=baseY-96,gr=26;
-    ctx.fillStyle='#3aa0d8';ctx.beginPath();ctx.arc(cx,gy,gr,0,7);ctx.fill();
-    ctx.fillStyle='#2a90c8';ctx.beginPath();ctx.arc(cx,gy,gr,0.3,Math.PI-0.3);ctx.fill();
-    ctx.fillStyle='#5fc26a';ctx.beginPath();ctx.arc(cx-9,gy-6,7,0,7);ctx.arc(cx+8,gy+2,6,0,7);ctx.arc(cx+4,gy-10,5,0,7);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,gy,gr,0,7);ctx.moveTo(cx-gr,gy);ctx.lineTo(cx+gr,gy);ctx.ellipse(cx,gy,gr*0.5,gr,0,0,7);ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.5)';ctx.beginPath();ctx.arc(cx-9,gy-9,4,0,7);ctx.fill();
-  }
-  else if(t==='courthouse'){
-    const box=isoBox(cx,baseY,96,62,72,c);
-    // pediment
-    ctx.fillStyle=lt;ctx.beginPath();ctx.moveTo(cx-46,baseY-72);ctx.lineTo(cx,baseY-100);ctx.lineTo(cx+46,baseY-72);ctx.closePath();ctx.fill();
-    // columns on the front face
-    for(let i=0;i<5;i++){const colx=cx-38+i*19;ctx.fillStyle=shade(c,22);ctx.fillRect(colx,baseY-66,9,52);ctx.fillStyle=shade(c,-12);ctx.fillRect(colx,baseY-66,9,4);}
-    // scales emblem in pediment
-    ctx.strokeStyle='#3a2d12';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,baseY-92);ctx.lineTo(cx,baseY-80);ctx.moveTo(cx-9,baseY-88);ctx.lineTo(cx+9,baseY-88);ctx.stroke();ctx.fillStyle='#ffd24d';ctx.fillRect(cx-11,baseY-86,4,3);ctx.fillRect(cx+7,baseY-86,4,3);
-  }
-  else if(t==='socialdev'){
-    const box=isoBox(cx,baseY,92,64,84,c);isoWindows(box,c,3,3);
-    // heart emblem
-    ctx.fillStyle='#e86a8a';ctx.beginPath();ctx.arc(cx-5,baseY-92,5,0,7);ctx.arc(cx+5,baseY-92,5,0,7);ctx.moveTo(cx-9,baseY-90);ctx.lineTo(cx,baseY-78);ctx.lineTo(cx+9,baseY-90);ctx.fill();
-  }
-  else if(t==='camera'){
-    const box=isoBox(cx,baseY,80,56,54,c);isoWindows(box,c,3,2);
-    // camera pole
-    const polx=cx+44;ctx.fillStyle='#666';ctx.fillRect(polx,baseY-96,5,96);
-    rrect(polx-26,baseY-104,28,16,3,'#2a2a2e');ctx.fillStyle='#9ad';ctx.beginPath();ctx.arc(polx-18,baseY-96,4,0,7);ctx.fill();ctx.fillStyle='#f55';ctx.fillRect(polx-7,baseY-100,3,3);
-    // flash
-    ctx.fillStyle='rgba(255,255,210,.8)';ctx.beginPath();ctx.moveTo(polx-30,baseY-96);ctx.lineTo(polx-46,baseY-104);ctx.lineTo(polx-42,baseY-92);ctx.lineTo(polx-54,baseY-90);ctx.lineTo(polx-40,baseY-84);ctx.closePath();ctx.fill();
-  }
-  else if(t==='secure'){
-    const box=isoBox(cx,baseY,88,60,84,c);isoWindows(box,c,3,3);
-    // comms dish
-    ctx.fillStyle='#888';ctx.fillRect(cx+32,baseY-104,3,20);ctx.fillStyle='#bbb';ctx.beginPath();ctx.ellipse(cx+33,baseY-106,8,5,0.5,0,7);ctx.fill();
-    // shield + padlock
-    ctx.fillStyle='#cdd6e0';ctx.beginPath();ctx.moveTo(cx,baseY-104);ctx.lineTo(cx-13,baseY-96);ctx.lineTo(cx-13,baseY-80);ctx.lineTo(cx,baseY-72);ctx.lineTo(cx+13,baseY-80);ctx.lineTo(cx+13,baseY-96);ctx.closePath();ctx.fill();
-    ctx.fillStyle='#ffd24d';ctx.fillRect(cx-4,baseY-92,8,7);ctx.strokeStyle='#ffd24d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,baseY-93,3,Math.PI,2*Math.PI);ctx.stroke();
-  }
-  else { // tribunal — Fair Work: clean modern glass tower + elevated scales sign
-    const H=104, topY=baseY-H;
-    const box=isoBox(cx,baseY,82,58,H,c);
-    // neat vertical glass mullions on the front face (evenly spaced, fitted to the box)
-    ctx.fillStyle='rgba(255,255,255,.22)';
-    for(let s=0;s<4;s++){const x=cx-30+s*17;ctx.fillRect(x,topY+10,6,H-20);}
-    // soft horizontal floor lines
-    ctx.fillStyle='rgba(20,40,70,.18)';
-    for(let fy=topY+22; fy<baseY-6; fy+=20){ctx.fillRect(cx-34,fy,68,2);}
-    // a thin parapet cap (lighter, not a black slab)
-    rrect(cx-36,topY-4,72,7,3,shade(c,34));
-    // slim post holding a small scales emblem above the roof
-    ctx.fillStyle='#8a93a6';ctx.fillRect(cx-1.5,topY-22,3,20);
-    const ey=topY-26;ctx.strokeStyle='#F0A830';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.fillStyle='#F0A830';
-    ctx.beginPath();ctx.moveTo(cx,ey-7);ctx.lineTo(cx,ey+7);ctx.moveTo(cx-12,ey-5);ctx.lineTo(cx+12,ey-5);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx-16,ey-1);ctx.lineTo(cx-8,ey-1);ctx.moveTo(cx+8,ey-1);ctx.lineTo(cx+16,ey-1);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx-5,ey+7);ctx.lineTo(cx+5,ey+7);ctx.stroke();
-  }
-}
-
-// soft, rounded character viewed from front, walking down
-function drawHero(cx,cy,step){
-  const skin='#e0aa72',shirt='#3a7d8a',pants='#33384a',hair='#2a1d18',bag='#9a6a3a';
-  softShadow(cx,cy+20,18);
-  const sw=step?3:-3;
-  // legs (rounded)
-  rrect(cx-7,cy+6,6,16,3,pants);rrect(cx+1,cy+6,6,16,3,pants);
-  rrect(cx-8,cy+20,8,5,2,'#222');rrect(cx+1,cy+20,8,5,2,'#222');
-  // torso (rounded)
-  rrect(cx-9,cy-10,18,20,7,shirt);
-  // shoulder highlight
-  ctx.fillStyle='rgba(255,255,255,.12)';ctx.beginPath();ctx.roundRect(cx-9,cy-10,18,6,5);ctx.fill();
-  // satchel strap + bag
-  rrect(cx+6,cy-4,7,10,2,bag);
-  // arms swinging slightly
-  rrect(cx-12,cy-8+sw,5,14,3,shirt);rrect(cx+7,cy-8-sw,5,14,3,shirt);
-  // head (round)
-  ctx.fillStyle=skin;ctx.beginPath();ctx.arc(cx,cy-18,9,0,7);ctx.fill();
-  ctx.fillStyle=hair;ctx.beginPath();ctx.arc(cx,cy-21,9,Math.PI,2*Math.PI);ctx.fill();ctx.fillRect(cx-9,cy-21,18,3);
-  // eyes
-  ctx.fillStyle='#222';ctx.beginPath();ctx.arc(cx-3,cy-17,1.4,0,7);ctx.arc(cx+3,cy-17,1.4,0,7);ctx.fill();
-}
-
-let last=0;
-function loop(ts){
-  const dt=Math.min(40,ts-last);last=ts;
-  moving=false;
-  if(keys['ArrowUp']&&hasMoved){py-=SPEED*dt/16;moving=true;}
-  if(keys['ArrowDown']){py+=SPEED*dt/16;moving=true;hasMoved=true;}
-  py=Math.max(120,Math.min(WORLD_LEN-80,py));
-  if(moving){ftime+=dt;if(ftime>120){frame^=1;ftime=0;}}else frame=0;
-
-  const camY=py-H*0.42;                       // camera follows player vertically
-  const prog=(py-120)/(WORLD_LEN-200);        // 0 present(top) .. 1 past(bottom)
-
-  // soft grass field (clean top-down)
-  ctx.clearRect(0,0,W,H);
-  // grass verges (leave sky only as a thin strip is unnecessary — full grass field looks right top-down)
-  ctx.fillStyle='#74c46a';ctx.fillRect(0,0,W,H);
-  // subtle grass texture tufts
-  ctx.fillStyle='rgba(95,178,92,.6)';
-  for(let gy=((-camY*0.5)%40+40)%40; gy<H; gy+=40)for(let gx=18; gx<W; gx+=66){if(Math.abs(gx-W/2)>70){ctx.beginPath();ctx.ellipse(gx,gy,5,2,0,0,7);ctx.fill();}}
-  // road as a soft rounded ribbon down the middle
-  const roadW=92, rx=W/2;
-  ctx.fillStyle='#9aa0ac';ctx.beginPath();ctx.roundRect(rx-roadW/2,-20,roadW,H+40,14);ctx.fill();
-  ctx.fillStyle='#aeb4c0';ctx.fillRect(rx-roadW/2,-20,5,H+40);
-  ctx.fillStyle='#878d99';ctx.fillRect(rx+roadW/2-5,-20,5,H+40);
-  // centre dashes (rounded), amber
-  for(let yy=((-camY)%52+52)%52; yy<H; yy+=52){ctx.fillStyle='#F0A830';ctx.beginPath();ctx.roundRect(rx-3,yy,6,22,3);ctx.fill();}
-
-  // buildings, alternating sides
+(function buildTimeline(){
+  const list=document.getElementById('tl-list');
   JOBS.forEach((j,i)=>{
-    const wy=jobY(i)-camY;
-    if(wy>-200 && wy<H+200){
-      const side=(i%2)? -1: 1;
-      const cx=W/2 + side*(roadW/2 + 70);
-      // soft connector path from road to plot
-      ctx.strokeStyle='#9aa0ac';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(W/2,wy+18);ctx.lineTo(cx,wy+22);ctx.stroke();
-      drawBuilding(j,cx,wy+22);
-      // year marker — rounded pill on the road
-      ctx.font="bold 12px 'Plus Jakarta Sans'";ctx.textAlign='center';
-      const lbl=j.yr, lw=ctx.measureText(lbl).width, pw2=Math.max(40,lw+18);
-      ctx.fillStyle='#0a1120';ctx.beginPath();ctx.roundRect(W/2-pw2/2,wy-4,pw2,20,10);ctx.fill();
-      ctx.fillStyle='#F0A830';ctx.fillText(lbl,W/2,wy+10);
-    }
+    const item=document.createElement('div');item.className='tl-item';
+    const yr=document.createElement('div');yr.className='tl-yr';yr.textContent=j.yr;
+    const card=document.createElement('div');card.className='tl-card';
+    const org=document.createElement('div');org.className='tl-org';org.textContent=j.org.replace(/\n/g,' ');
+    const role=document.createElement('div');role.className='tl-role';role.textContent=j.role;
+    const blurb=document.createElement('div');blurb.className='tl-blurb';blurb.textContent=humaniseC(j.blurb);
+    const btn=document.createElement('button');btn.className='tl-ask';btn.textContent='Ask about this role';btn.onclick=()=>askAbout(i);
+    card.append(org,role,blurb,btn);item.append(yr,card);list.appendChild(item);
   });
-
-  // hero on the path
-  drawHero(W/2, py-camY, frame);
-
-  // nearest job → year tag + card
-  let best=0,bd=1e9;JOBS.forEach((j,i)=>{const d=Math.abs(py-jobY(i));if(d<bd){bd=d;best=i;}});
-  ytag.textContent = best===0 ? "NOW" : JOBS[best].yr;
-  if(bd<46 && activeJob<0 && !cardLock && hasMoved){showCard(best);cardLock=true;}
-  if(bd>96){cardLock=false;if(activeJob>=0)hideCard();}
-
-  requestAnimationFrame(loop);
-}
-resize();requestAnimationFrame(loop);setTimeout(resize,60);setTimeout(resize,300);
+})();
 
 // ===== share =====
 const shareBtn=document.getElementById('shareBtn');
