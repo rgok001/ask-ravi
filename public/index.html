@@ -114,10 +114,17 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .nv-c{display:flex;gap:26px}
 .nv-c a{font-weight:600;font-size:14px;color:var(--ink-2);text-decoration:none;transition:.15s}
 .nv-c a:hover{color:var(--ink)}
+.nv-c a.active{color:var(--accent-deep);font-weight:700}
+.view{display:none}
+.view.active{display:block;animation:viewfade .28s ease}
+@keyframes viewfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view.active{animation:none}}
+#view-timeline .wrap{padding-top:36px}
 /* MOBILE: no game, single scrolling column */
 @media(max-width:780px){
   body{overflow:hidden}
-  .nv-c{display:none}
+  .nv-c{gap:16px}
+  .nv-c a{font-size:13px}
   #topnav{padding:0 16px;height:56px}
   #app{padding-top:56px}
   .hero{padding:22px 20px 0}
@@ -140,7 +147,7 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 <body>
 <nav id="topnav">
   <div class="nv-l">Ravi-OS</div>
-  <div class="nv-c"><a href="#chatcard">AI chat</a><a href="#timeline">Timeline</a></div>
+  <div class="nv-c"><a href="#" data-view="chat" class="active">AI chat</a><a href="#" data-view="timeline">Timeline</a></div>
   <div class="nv-r">
     <a class="hbtn ghost" id="cvBtn" href="/Ravi-Gokal-CV.pdf" download="Ravi-Gokal-CV.pdf" title="Download Ravi's CV as a PDF">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -161,6 +168,7 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 
   <!-- chat column -->
   <section id="chat">
+    <div id="view-chat" class="view active">
     <div class="hero">
       <h1>Don't read my CV. <span class="a">Interrogate it.</span></h1>
       <p class="sub">Thanks for stopping by. Instead of scrolling through a CV, you can just ask. I've spent 13 years as a business analyst across government and beyond. Go ahead and ask me about any of it.</p>
@@ -201,10 +209,15 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
           <div class="skills"><span>Agile &amp; Scrum</span><span>Stakeholder management</span><span>BPMN process mapping</span><span>Secure cloud (M365 &amp; Azure)</span><span>Backlog ownership</span></div>
         </div>
       </div>
-      <div id="timeline">
-        <h2>Career timeline</h2>
-        <p class="tl-sub">Thirteen years, newest first. Ask the assistant about any of them.</p>
-        <div id="tl-list"></div>
+    </div>
+    </div>
+    <div id="view-timeline" class="view">
+      <div class="wrap">
+        <div id="timeline">
+          <h2>Career timeline</h2>
+          <p class="tl-sub">Thirteen years, newest first. Ask the assistant about any of them.</p>
+          <div id="tl-list"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -252,11 +265,23 @@ const JOB_CHIPS=[
   ["What did he do in the health sector?","Why did a PM call him a business analyst extraordinaire?"],
   ["Where did his career start?","What was his first analyst role?"]
 ];
-// ===== career timeline =====
-function askAbout(i){
+// ===== career timeline (its own tab) =====
+function showView(name){
+  document.getElementById('view-chat').classList.toggle('active',name==='chat');
+  document.getElementById('view-timeline').classList.toggle('active',name==='timeline');
+  document.querySelectorAll('.nv-c a').forEach(a=>a.classList.toggle('active',a.dataset.view===name));
+  document.getElementById('chat').scrollTop=0;
+}
+document.querySelectorAll('.nv-c a').forEach(a=>{a.onclick=e=>{e.preventDefault();showView(a.dataset.view);};});
+function askAbout(i,btn){
   if(JOB_CHIPS[i])setChips(JOB_CHIPS[i]);
-  document.getElementById('chatcard').scrollIntoView({block:'center'});
-  input.focus();
+  if(btn){btn.textContent='Opening AI chat…';btn.disabled=true;}
+  setTimeout(()=>{
+    showView('chat');
+    document.getElementById('chatcard').scrollIntoView({block:'center'});
+    if(window.innerWidth>780)input.focus();
+    if(btn){btn.textContent='Ask about this role';btn.disabled=false;}
+  },380);
 }
 (function buildTimeline(){
   const list=document.getElementById('tl-list');
@@ -267,7 +292,7 @@ function askAbout(i){
     const org=document.createElement('div');org.className='tl-org';org.textContent=j.org.replace(/\n/g,' ');
     const role=document.createElement('div');role.className='tl-role';role.textContent=j.role;
     const blurb=document.createElement('div');blurb.className='tl-blurb';blurb.textContent=humaniseC(j.blurb);
-    const btn=document.createElement('button');btn.className='tl-ask';btn.textContent='Ask about this role';btn.onclick=()=>askAbout(i);
+    const btn=document.createElement('button');btn.className='tl-ask';btn.textContent='Ask about this role';btn.onclick=()=>askAbout(i,btn);
     card.append(org,role,blurb,btn);item.append(yr,card);list.appendChild(item);
   });
 })();
