@@ -79,6 +79,7 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .chip:hover{border-color:var(--border2)}
 .chip.jdc{color:var(--accent-deep);background:#FDF1D8}
 .chip.jdc:hover{background:#FCEBC9}
+.chip.sel{background:var(--ink)!important;color:#fff!important}
 .composer{display:flex;align-items:center;gap:10px;margin:12px 16px 16px;padding:4px 4px 4px 16px;
   border:1px solid var(--border2);border-radius:12px;background:var(--bg)}
 .composer:focus-within{border-color:var(--ink)}
@@ -320,14 +321,11 @@ function showShareFallback(url){
 
 // ===== chat =====
 const SUGGESTED=["Why should I hire Ravi?","Tell me about his security work","What's his biggest cost saving?","Has he led teams?","How does he use AI in his work?","What do people say about him?"];
-// persona paths — each seeds different chips and a short client-side ack (no API cost)
+// persona paths — each seeds different chips (the choice also tilts the system prompt server-side)
 const PERSONAS={
-  recruiter:{label:"I'm a recruiter",chips:["Give me the 60-second pitch","Where is he based and what are his work rights?","Contract or permanent: what's his history?","What do his references say?"],
-    ack:"On the record for a recruiter, then. Short version: 13+ years, Senior BA & Delivery Lead, government work in security-sensitive environments, NZ citizen based in Brisbane. Ask me anything, start with a prompt above, or paste a job description and I'll assess the fit honestly."},
-  manager:{label:"I'm a hiring manager",chips:["What's his biggest delivery win?","How does he handle difficult stakeholders?","Has he led teams?","How does he use AI in his work?"],
-    ack:"Good, the hiring manager view. He's led mixed vendor/in-house squads, owned a 200+ story backlog, and reported to steering committees. Tell me what your role needs and I'll map him to it, or pick a prompt above."},
-  curious:{label:"Just curious",chips:["What's the most unusual project he's worked on?","Tell me the million-dollar saving story","What's the IoT roadside enforcement platform?","What do people say about him?"],
-    ack:"Welcome, no agenda required. In here: a speed-camera programme, security work for a high-threat ministry, and a saving worth a million dollars a year. Pull a thread above, or ask your own."}
+  recruiter:{label:"I'm a recruiter",chips:["Give me the 60-second pitch","Where is he based and what are his work rights?","Contract or permanent: what's his history?","What do his references say?"]},
+  manager:{label:"I'm a hiring manager",chips:["What's his biggest delivery win?","How does he handle difficult stakeholders?","Has he led teams?","How does he use AI in his work?"]},
+  curious:{label:"Just curious",chips:["What's the most unusual project he's worked on?","Tell me the million-dollar saving story","What's the IoT roadside enforcement platform?","What do people say about him?"]}
 };
 let persona=sessionStorage.getItem('ravi_persona')||null;
 const chips=document.getElementById('chips'),thread=document.getElementById('thread'),input=document.getElementById('input'),send=document.getElementById('send');
@@ -350,12 +348,12 @@ function choosePersona(k,silent){
   if(!PERSONAS[k])return;
   persona=k;sessionStorage.setItem('ravi_persona',k);
   document.querySelectorAll('#greet .chip').forEach(btn=>{
+    const isSel=btn.dataset.persona===k;
     btn.disabled=true;btn.style.cursor='default';
-    btn.style.opacity=btn.dataset.persona===k?'1':'.55';
-    if(btn.dataset.persona===k){btn.style.borderColor='var(--blue)';btn.style.color='var(--blue)';}
+    btn.style.opacity=isSel?'1':'.5';
+    btn.classList.toggle('sel',isSel);
   });
   setChips(PERSONAS[k].chips);
-  if(!silent)addB(PERSONAS[k].ack);
 }
 setChips(SUGGESTED);
 renderGreeting();
