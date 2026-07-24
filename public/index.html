@@ -348,10 +348,7 @@ function choosePersona(k,silent){
   if(!PERSONAS[k])return;
   persona=k;sessionStorage.setItem('ravi_persona',k);
   document.querySelectorAll('#greet .chip').forEach(btn=>{
-    const isSel=btn.dataset.persona===k;
-    btn.disabled=true;btn.style.cursor='default';
-    btn.style.opacity=isSel?'1':'.5';
-    btn.classList.toggle('sel',isSel);
+    btn.classList.toggle('sel',btn.dataset.persona===k);
   });
   setChips(PERSONAS[k].chips);
 }
