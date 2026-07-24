@@ -105,6 +105,10 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .tl-blurb{margin-top:8px;font-size:14px;line-height:1.6;color:var(--ink-2)}
 .tl-ask{margin-top:12px;background:var(--subtle);border:1px solid transparent;color:var(--ink);font-family:inherit;font-weight:600;font-size:12.5px;border-radius:9999px;padding:7px 14px;cursor:pointer;transition:.15s}
 .tl-ask:hover{border-color:var(--border2)}
+.tl-ask:disabled{opacity:.6;cursor:default}
+.tl-ans{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:14px;line-height:1.6;color:var(--body-c);white-space:pre-wrap}
+.tl-ans.show{display:block;animation:viewfade .28s ease}
+.tl-ans .tag{display:block;margin-bottom:6px}
 .nv-c{display:flex;gap:26px}
 .nv-c a{font-weight:600;font-size:14px;color:var(--ink-2);text-decoration:none;transition:.15s}
 .nv-c a:hover{color:var(--ink)}
@@ -259,15 +263,36 @@ function showView(name){
   document.getElementById('chat').scrollTop=0;
 }
 document.querySelectorAll('.nv-c a').forEach(a=>{a.onclick=e=>{e.preventDefault();showView(a.dataset.view);};});
-function askAbout(i,btn){
-  if(JOB_CHIPS[i])setChips(JOB_CHIPS[i]);
-  if(btn){btn.textContent='Opening AI chat…';btn.disabled=true;}
-  setTimeout(()=>{
-    showView('chat');
-    document.getElementById('chatcard').scrollIntoView({block:'center'});
-    if(window.innerWidth>780)input.focus();
-    if(btn){btn.textContent='Ask about this role';btn.disabled=false;}
-  },380);
+// Answer a role question inline on its timeline card — the visitor stays put.
+async function askRoleInline(i,btn,ans){
+  if(btn.dataset.busy)return;
+  btn.dataset.busy='1';btn.disabled=true;btn.textContent='Thinking…';
+  ans.classList.add('show');
+  ans.innerHTML='<span class="tag">RAVI-OS</span><span class="tl-atext"><span class="blink">thinking</span><span class="blink" style="animation-delay:.3s">.</span><span class="blink" style="animation-delay:.6s">.</span></span>';
+  const atext=ans.querySelector('.tl-atext');
+  const j=JOBS[i];
+  const q="Tell me about Ravi's role at "+j.org.replace(/\n/g,' ')+" ("+j.yr+"). What did he do and what was the impact?";
+  const payload=JSON.stringify({messages:[{role:'user',content:q}],sessionId:SESSION_ID,referrer:document.referrer,pagePath:location.pathname,persona});
+  try{
+    let acc='',finalTxt='',streamed=false;
+    try{
+      const res=await fetch(STREAM_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:payload});
+      if(res.ok&&res.body&&(res.headers.get('content-type')||'').includes('text/plain')){
+        streamed=true;atext.textContent='';
+        const reader=res.body.getReader();const dec=new TextDecoder();
+        while(true){const {done,value}=await reader.read();if(done)break;acc+=dec.decode(value,{stream:true});atext.textContent=displayOf(acc);}
+        finalTxt=signalsOf(acc).text||'…';atext.textContent=finalTxt;
+      }
+    }catch(e){if(streamed&&acc)finalTxt=signalsOf(acc).text||'…';else streamed=false;}
+    if(!streamed){
+      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:payload});
+      const d=await res.json();finalTxt=d.text||d.error||'…';atext.textContent=finalTxt;
+    }
+    btn.style.display='none'; // answered
+  }catch(e){
+    atext.textContent="Couldn't load that just now. Try the AI chat tab, or email ravi.gokal@gmail.com.";
+    btn.disabled=false;btn.textContent='Ask about this role';btn.dataset.busy='';
+  }
 }
 (function buildTimeline(){
   const list=document.getElementById('tl-list');
@@ -278,8 +303,10 @@ function askAbout(i,btn){
     const org=document.createElement('div');org.className='tl-org';org.textContent=j.org.replace(/\n/g,' ');
     const role=document.createElement('div');role.className='tl-role';role.textContent=j.role;
     const blurb=document.createElement('div');blurb.className='tl-blurb';blurb.textContent=humaniseC(j.blurb);
-    const btn=document.createElement('button');btn.className='tl-ask';btn.textContent='Ask about this role';btn.onclick=()=>askAbout(i,btn);
-    card.append(org,role,blurb,btn);item.append(yr,card);list.appendChild(item);
+    const btn=document.createElement('button');btn.className='tl-ask';btn.textContent='Ask about this role';
+    const ans=document.createElement('div');ans.className='tl-ans';
+    btn.onclick=()=>askRoleInline(i,btn,ans);
+    card.append(org,role,blurb,btn,ans);item.append(yr,card);list.appendChild(item);
   });
 })();
 
